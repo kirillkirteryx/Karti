@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Марвел-Дурак</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Russo+One&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{font-family:'Oswald',sans-serif;background:#05051a;color:#fff;min-height:100vh;overflow-x:hidden;user-select:none}
+#bgLayer{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:radial-gradient(circle at 50% 40%,#1e1e50 0%,#05051a 80%);transition:background .6s}
+#bgLayer .stars{position:absolute;inset:-50%;background-image:radial-gradient(1.5px 1.5px at 20px 30px,#fff,transparent),radial-gradient(1px 1px at 50px 90px,#fff,transparent),radial-gradient(1.5px 1.5px at 130px 60px,#aaccff,transparent),radial-gradient(1px 1px at 200px 140px,#fff,transparent),radial-gradient(2px 2px at 280px 40px,#ffd700,transparent),radial-gradient(1px 1px at 340px 200px,#fff,transparent),radial-gradient(1.5px 1.5px at 420px 110px,#aaccff,transparent);background-size:500px 300px;animation:sm 60s linear infinite;opacity:.5}
+@keyframes sm{to{transform:translate(-500px,-300px)}}
+#bgLayer .rays{position:absolute;top:50%;left:50%;width:200vmax;height:200vmax;transform:translate(-50%,-50%);background:repeating-conic-gradient(from 0deg,rgba(255,215,0,.03) 0deg 2deg,transparent 2deg 12deg);animation:rr 120s linear infinite;opacity:.6;transition:opacity .6s}
+@keyframes rr{to{transform:translate(-50%,-50%) rotate(360deg)}}
+#bgLayer .cityLayer{position:absolute;bottom:0;left:0;right:0;height:60%;background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.6) 100%),linear-gradient(90deg,#0a0a2a 0 8%,transparent 8% 10%,#0f0f3a 10% 22%,transparent 22% 25%,#0a0a2a 25% 40%,transparent 40% 43%,#12123e 43% 60%,transparent 60% 63%,#0a0a2a 63% 78%,transparent 78% 81%,#0f0f3a 81% 95%,transparent 95%);opacity:0;transition:opacity .6s}
+#bgLayer .gridLayer{position:absolute;inset:0;background-image:linear-gradient(rgba(46,204,113,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(46,204,113,.08) 1px,transparent 1px);background-size:40px 40px;opacity:0;transition:opacity .6s}
+body.scene-cosmic #bgLayer{background:radial-gradient(ellipse at 20% 30%,rgba(142,68,173,.35) 0%,transparent 45%),radial-gradient(ellipse at 80% 70%,rgba(52,152,219,.30) 0%,transparent 50%),radial-gradient(ellipse at 50% 50%,rgba(199,0,48,.20) 0%,transparent 60%),radial-gradient(circle at 50% 40%,#1e1e50 0%,#05051a 80%)}
+body.scene-cosmic #bgLayer .stars{opacity:.8;animation:sm 90s linear infinite,nebulaPulse 12s ease-in-out infinite}
+@keyframes nebulaPulse{0%,100%{filter:hue-rotate(0deg) brightness(1)}50%{filter:hue-rotate(30deg) brightness(1.2)}}
+body.scene-cosmic #bgLayer .rays{opacity:.4}
+body.scene-city #bgLayer{background:linear-gradient(180deg,#0a0a2e 0%,#1a0a3a 40%,#2c1810 70%,#0a0515 100%)}
+body.scene-city #bgLayer .cityLayer{opacity:.85;background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.8) 100%),repeating-linear-gradient(90deg,transparent 0 20px,rgba(255,215,0,.15) 20px 22px,transparent 22px 40px),linear-gradient(90deg,#0a0a2a 0 6%,transparent 6% 7%,#15153a 7% 18%,transparent 18% 19%,#0a0a2a 19% 30%,transparent 30% 32%,#1a1a4a 32% 45%,transparent 45% 47%,#0a0a2a 47% 60%,transparent 60% 62%,#15153a 62% 75%,transparent 75% 77%,#0a0a2a 77% 88%,transparent 88% 90%,#1a1a4a 90% 100%);animation:cityGlow 4s ease-in-out infinite}
+@keyframes cityGlow{0%,100%{filter:brightness(1)}50%{filter:brightness(1.3)}}
+body.scene-city #bgLayer .stars{opacity:.4}
+body.scene-city #bgLayer .rays{opacity:.15}
+body.scene-lab #bgLayer{background:radial-gradient(circle at 30% 20%,rgba(46,204,113,.15) 0%,transparent 50%),radial-gradient(circle at 70% 80%,rgba(52,152,219,.12) 0%,transparent 50%),radial-gradient(circle at 50% 40%,#0a1a1a 0%,#020a0a 90%)}
+body.scene-lab #bgLayer .gridLayer{opacity:1;background-image:linear-gradient(rgba(46,204,113,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(46,204,113,.12) 1px,transparent 1px);animation:gridScroll 20s linear infinite}
+@keyframes gridScroll{0%{background-position:0 0}100%{background-position:40px 40px}}
+body.scene-lab #bgLayer .rays{opacity:0}
+body.scene-daily #bgLayer{background:radial-gradient(circle at 50% 40%,#151530 0%,#05051a 80%)}
+body.scene-daily #bgLayer .rays{opacity:.15}
+body.scene-comic #bgLayer{background:radial-gradient(circle at 50% 50%,rgba(255,215,0,.15) 0%,transparent 60%),radial-gradient(circle at 20% 20%,rgba(231,76,60,.20) 0%,transparent 40%),radial-gradient(circle at 80% 80%,rgba(52,152,219,.20) 0%,transparent 40%),radial-gradient(circle at 50% 40%,#2a0a1a 0%,#0a0515 90%)}
+body.scene-comic #bgLayer .rays{opacity:.7;background:repeating-conic-gradient(from 0deg,rgba(255,215,0,.06) 0deg 3deg,transparent 3deg 15deg);animation:comicSpin 40s linear infinite}
+@keyframes comicSpin{0%{transform:translate(-50%,-50%) rotate(0deg)}100%{transform:translate(-50%,-50%) rotate(360deg)}}
+body.scene-comic #bgLayer .stars{opacity:.3;animation:comicPulse 2s ease-in-out infinite}
+@keyframes comicPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+body.scene-mystic #bgLayer{background:radial-gradient(circle at 50% 50%,rgba(142,68,173,.25) 0%,transparent 55%),radial-gradient(circle at 50% 50%,rgba(52,152,219,.15) 0%,transparent 70%),radial-gradient(circle at 50% 50%,#1a0a2e 0%,#05051a 90%)}
+body.scene-mystic #bgLayer .rays{opacity:.9;background:repeating-conic-gradient(from 0deg,rgba(142,68,173,.10) 0deg 2deg,transparent 2deg 8deg);animation:mysticSpin 30s linear infinite}
+@keyframes mysticSpin{0%{transform:translate(-50%,-50%) rotate(0deg) scale(1)}50%{transform:translate(-50%,-50%) rotate(180deg) scale(1.1)}100%{transform:translate(-50%,-50%) rotate(360deg) scale(1)}}
+body.scene-mystic #bgLayer .stars{opacity:.6;animation:mysticStars 8s ease-in-out infinite}
+@keyframes mysticStars{0%,100%{filter:hue-rotate(0deg) brightness(1)}50%{filter:hue-rotate(60deg) brightness(1.5)}}
+#game,#menu{position:relative;z-index:1}
+#game{display:flex;flex-direction:column;min-height:100vh;padding:10px;gap:8px}
+#topBar{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;gap:8px;flex-wrap:wrap;background:linear-gradient(180deg,rgba(20,20,50,.9),rgba(10,10,30,.7));border-radius:12px;border:1px solid rgba(255,215,0,.15);box-shadow:0 4px 20px rgba(0,0,0,.5)}
+.player-info{display:flex;align-items:center;gap:8px;padding:4px 12px 4px 4px;border-radius:30px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);transition:all .2s}
+.player-info.active{background:rgba(255,215,0,.15);border-color:rgba(255,215,0,.5);box-shadow:0 0 20px rgba(255,215,0,.35)}
+.player-info.enemy.active{background:rgba(231,76,60,.15);border-color:rgba(231,76,60,.5);box-shadow:0 0 20px rgba(231,76,60,.35)}
+.avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(145deg,#333,#111);border:2px solid #ffd70066;display:flex;align-items:center;justify-content:center;font-size:20px;background-size:cover;background-position:center;flex-shrink:0}
+.player-info.enemy .avatar{border-color:#e74c3c66}
+.pName{font-family:'Russo One',sans-serif;font-size:13px}
+.pCount{font-family:'Bangers',cursive;font-size:20px;color:#ffd700;letter-spacing:1px}
+.stat{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.05);padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.06);font-family:'Russo One',sans-serif;font-size:12px}
+.stat.gold{color:#ffd700;background:rgba(255,215,0,.1);border-color:rgba(255,215,0,.25)}
+.stat.red{color:#ff6b6b;background:rgba(231,76,60,.1);border-color:rgba(231,76,60,.25)}
+.stat.online{color:#2ecc71;background:rgba(46,204,113,.1);border-color:rgba(46,204,113,.3)}
+.icon-btn{background:rgba(255,255,255,.05);padding:7px 11px;border-radius:8px;color:#aab;cursor:pointer;border:1px solid rgba(255,255,255,.06);font-family:inherit;font-size:13px;transition:all .15s}
+.icon-btn:hover{color:#ffd700;background:rgba(255,215,0,.1);border-color:rgba(255,215,0,.3)}
+.icon-btn.off{color:#555;text-decoration:line-through;opacity:.6}
+#turnIndicator{text-align:center;padding:10px 20px;font-family:'Bangers',cursive;font-size:26px;letter-spacing:3px;border-radius:12px;transition:all .4s;margin:0 auto;min-width:260px;max-width:400px}
+#turnIndicator.my{background:linear-gradient(145deg,rgba(255,215,0,.25),rgba(255,215,0,.08));color:#ffd700;text-shadow:0 0 16px rgba(255,215,0,.8);border:2px solid rgba(255,215,0,.5);animation:tpy 2s ease-in-out infinite}
+#turnIndicator.enemy{background:linear-gradient(145deg,rgba(231,76,60,.25),rgba(231,76,60,.08));color:#ff6b6b;text-shadow:0 0 16px rgba(231,76,60,.8);border:2px solid rgba(231,76,60,.5);animation:tpr 2s ease-in-out infinite}
+#turnIndicator.hidden{display:none}
+@keyframes tpy{0%,100%{box-shadow:0 0 20px rgba(255,215,0,.3)}50%{box-shadow:0 0 40px rgba(255,215,0,.6)}}
+@keyframes tpr{0%,100%{box-shadow:0 0 20px rgba(231,76,60,.3)}50%{box-shadow:0 0 40px rgba(231,76,60,.6)}}
+.hand{display:flex;justify-content:center;align-items:flex-end;gap:4px;flex-wrap:wrap;padding:36px 4px 4px;min-height:200px}
+#aiHand{min-height:168px;align-items:flex-start;padding-top:26px}
+#tableArea{flex:1;display:flex;justify-content:center;align-items:center;gap:30px;min-height:220px;padding:8px}
+#pileWrap{flex:1;display:flex;justify-content:center;align-items:center;min-width:0;min-height:200px}
+#pileCards{display:flex;gap:16px;align-items:flex-start;justify-content:center;min-height:200px;flex-wrap:wrap;padding:10px}
+.pile-stack{display:flex;flex-direction:column;align-items:center;gap:4px;position:relative}
+.pile-placeholder{color:#2a2a4e;font-size:16px;padding:100px 50px;border:2px dashed #2a2a4e;border-radius:14px;letter-spacing:4px;font-family:'Russo One',sans-serif}
+#message{font-family:'Russo One',sans-serif;font-size:15px;text-align:center;color:#ffd700;min-height:46px;max-width:800px;padding:12px 24px;line-height:1.4;margin:0 auto;background:linear-gradient(180deg,rgba(255,215,0,.1),rgba(255,215,0,.03));border-radius:12px;border:1px solid rgba(255,215,0,.25);box-shadow:0 0 24px rgba(255,215,0,.15);letter-spacing:.3px;text-shadow:0 0 12px rgba(255,215,0,.4)}
+#tableRight{display:flex;flex-direction:column;align-items:center;gap:12px;flex-shrink:0}
+#deckVisual,#discardVisual{width:120px;height:175px;position:relative}
+.deck-card{position:absolute;inset:0;border-radius:12px;background:radial-gradient(circle at 50% 30%,rgba(100,150,255,.25) 0%,transparent 60%),repeating-linear-gradient(45deg,#14204e 0,#14204e 10px,#1a2a5e 10px,#1a2a5e 20px);border:2px solid #3498db88;box-shadow:0 0 16px rgba(52,152,219,.4),inset 0 0 30px rgba(0,0,0,.8);display:flex;justify-content:center;align-items:center;transition:opacity .3s}
+.deck-card::before{content:'';position:absolute;inset:6px;border-radius:8px;border:1px dashed rgba(52,152,219,.35)}
+.deck-card.d1{transform:translate(-2px,-2px);opacity:.65}
+.deck-card.d2{transform:translate(-4px,-4px);opacity:.45}
+.deck-card.d3{transform:translate(-6px,-6px);opacity:.28}
+.deck-card.d4{transform:translate(-8px,-8px);opacity:.14}
+.deck-label-top,.discard-label-top{position:absolute;top:9px;left:50%;transform:translateX(-50%);font-size:10px;opacity:.9;letter-spacing:3px;font-family:'Russo One',sans-serif}
+.deck-label-top{color:#85c1e9}
+.deck-big,.discard-big{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:44px;color:#fff;font-family:'Bangers',cursive;line-height:1;text-shadow:3px 3px 0 #000}
+.deck-big{text-shadow:0 0 14px #3498db,0 0 28px rgba(52,152,219,.7),3px 3px 0 #000}
+.deck-label,.discard-label{position:absolute;bottom:9px;left:50%;transform:translateX(-50%);font-size:9px;opacity:.7;letter-spacing:3px;font-family:'Russo One',sans-serif}
+.deck-label{color:#85c1e9}
+.discard-card{position:absolute;inset:0;border-radius:12px;background:radial-gradient(circle at 50% 50%,rgba(231,76,60,.2) 0%,transparent 60%),repeating-linear-gradient(-45deg,#3a1414 0,#3a1414 10px,#4a1a1a 10px,#4a1a1a 20px);border:2px solid #e74c3c88;box-shadow:0 0 16px rgba(231,76,60,.35),inset 0 0 30px rgba(0,0,0,.8);display:flex;justify-content:center;align-items:center}
+.discard-label-top{color:#ff8888}
+.discard-big{text-shadow:0 0 14px #e74c3c,0 0 28px rgba(231,76,60,.7),3px 3px 0 #000}
+.discard-label{color:#ff8888}
+/* ===== КАРТОЧКИ 165×232 ===== */
+.card{width:165px;height:232px;border-radius:14px;background:linear-gradient(145deg,#1a1a3e,#0d0d24);border:2px solid var(--c1,#444);padding:7px 6px;display:flex;flex-direction:column;font-size:10.5px;position:relative;overflow:hidden;flex-shrink:0;box-shadow:0 4px 14px var(--glow,#0006),inset 0 0 24px rgba(0,0,0,.5);transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .25s;cursor:pointer;transform-origin:center bottom}
+.card.mini{width:96px;height:138px;font-size:8px;padding:3px;border-radius:10px}
+.card.mini .card-name{font-size:9px;min-height:18px;margin-bottom:2px;padding-top:10px}
+.card.mini .attr-row{font-size:7.5px;padding:1px 3px;margin-bottom:1px}
+.card.mini .emblem{font-size:22px}
+.card.mini .card-zoom{font-size:12px;top:3px;left:3px;padding:1px 3px}
+.card.back{background:repeating-linear-gradient(45deg,#1a1a3e 0,#1a1a3e 8px,#2a2a5e 8px,#2a2a5e 16px);justify-content:center;align-items:center;font-size:30px;color:#ffd700;border-color:#ffd70055;cursor:default}
+.card.back .aura,.card.back .emblem,.card.back .card-img,.card.back .card-zoom{display:none}
+.card .aura{position:absolute;inset:0;pointer-events:none;z-index:0;background:radial-gradient(circle at 50% 50%,var(--c1) 0%,transparent 70%);opacity:.35}
+.card .emblem{position:absolute;top:38px;right:6px;font-size:40px;opacity:.16;pointer-events:none;z-index:0;filter:drop-shadow(0 0 6px var(--c2,#fff))}
+.card>*:not(.aura):not(.emblem):not(.card-img):not(.card-zoom):not(.card-name){position:relative;z-index:1}
+.card-zoom{position:absolute;top:5px;left:5px;font-size:12px;padding:1px 5px;border-radius:5px;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);color:#ffd700;cursor:pointer;z-index:10;opacity:.55;transition:all .15s;border:1px solid rgba(255,215,0,.25)}
+.card-zoom:hover{opacity:1;background:rgba(255,215,0,.25);transform:scale(1.15)}
+.card-img{position:absolute;inset:0;background-size:cover;background-position:center top;border-radius:13px;z-index:0;opacity:.95;pointer-events:none}
+.card.has-img{justify-content:flex-end;overflow:visible;margin-top:26px}
+.card.has-img .card-img::after{content:'';position:absolute;inset:0;border-radius:13px;background:linear-gradient(180deg,rgba(0,0,0,.15) 0%,rgba(0,0,0,.1) 40%,rgba(0,0,0,.9) 100%)}
+/* ВАРИАНТ A: имя плашкой ВПЛОТНУЮ СВЕРХУ */
+.card.has-img .card-name{position:absolute;top:-26px;left:-2px;right:-2px;height:26px;margin:0;padding:0 8px;background:linear-gradient(180deg,rgba(15,15,40,.98),rgba(5,5,20,.95));color:#ffd700;border:2px solid var(--c2,#ffd700);border-bottom:none;border-radius:10px 10px 0 0;font-family:'Bangers',cursive;font-size:14px;font-weight:normal;letter-spacing:1.1px;display:flex;align-items:center;justify-content:center;text-shadow:0 0 6px rgba(255,215,0,.55),1px 1px 0 #000,-1px -1px 0 #000;box-shadow:0 -2px 10px var(--glow,rgba(255,215,0,.25));z-index:5;min-height:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase;line-height:1}
+.card.has-img .attr-row{background:rgba(0,0,0,.78)!important;backdrop-filter:blur(2px)}
+.card.mini.has-img{margin-top:20px}
+.card.mini.has-img .card-name{top:-20px;left:-1px;right:-1px;height:20px;font-size:10px;letter-spacing:.6px;padding:0 5px;border-radius:8px 8px 0 0;border-width:1.5px}
+.card.mini.has-img .attr-row{font-size:7px;padding:1px 3px;margin-bottom:1px}
+.card:not(.no-tilt):hover{transform:translateY(-12px) scale(1.05) rotate(0)!important;z-index:100}
+.fx-float .aura{animation:f1 2.8s ease-in-out infinite}
+.fx-tech .aura{animation:f2 2s ease-in-out infinite}
+.fx-mystic .aura{animation:f3 3.5s linear infinite}
+.fx-lightning .aura{animation:f4 1.8s steps(8) infinite}
+.fx-brute .aura{animation:f5 1.6s ease-in-out infinite}
+.fx-cosmic .aura{animation:f6 4s linear infinite}
+.fx-rage .aura{animation:f7 1.2s ease-in-out infinite}
+.fx-symbiote .aura{animation:f8 2.4s ease-in-out infinite}
+.fx-shadow .aura{animation:f9 3s ease-in-out infinite}
+.fx-shield .aura{animation:f10 3s linear infinite}
+@keyframes f1{0%,100%{transform:translateY(0) scale(1);opacity:.3}50%{transform:translateY(-4px) scale(1.1);opacity:.55}}
+@keyframes f2{0%,100%{opacity:.3}50%{opacity:.75;filter:brightness(1.6)}}
+@keyframes f3{0%{transform:scale(.7) rotate(0);opacity:.2}50%{transform:scale(1.35) rotate(180deg);opacity:.65}100%{transform:scale(.7) rotate(360deg);opacity:.2}}
+@keyframes f4{0%,8%{opacity:.15}10%{opacity:.95}12%{opacity:.15}14%{opacity:.95}16%{opacity:.2}100%{opacity:.2}}
+@keyframes f5{0%,100%{transform:translate(0,0);opacity:.35}25%{transform:translate(-3px,1px);opacity:.6}75%{transform:translate(3px,-1px);opacity:.6}}
+@keyframes f6{0%{transform:rotate(0);opacity:.3}100%{transform:rotate(360deg);opacity:.6}}
+@keyframes f7{0%,100%{opacity:.3}50%{opacity:.8;filter:brightness(1.6) saturate(2)}}
+@keyframes f8{0%,100%{transform:scale(1) rotate(0);opacity:.35}50%{transform:scale(1.3) rotate(15deg);opacity:.7}}
+@keyframes f9{0%,100%{transform:translate(0,0);opacity:.25}50%{transform:translate(4px,-4px);opacity:.6}}
+@keyframes f10{0%{transform:rotate(0)}50%{transform:rotate(180deg) scale(1.2)}100%{transform:rotate(360deg)}}
+.card.just-played{animation:cb .75s cubic-bezier(.18,.9,.4,1.25)}
+@keyframes cb{0%{transform:translateY(240px) scale(.4) rotate(-18deg);opacity:0;filter:brightness(3.5)}45%{transform:translateY(-16px) scale(1.22) rotate(5deg);opacity:1;filter:brightness(1.9)}70%{transform:translateY(5px) scale(.97) rotate(-1deg);opacity:1}100%{transform:translateY(0) scale(1) rotate(0);opacity:1;filter:brightness(1)}}
+.card.just-played::before{content:'';position:absolute;inset:-14px;border-radius:18px;background:radial-gradient(circle,var(--glow,#fff) 0%,transparent 65%);animation:br .8s ease-out forwards;pointer-events:none;z-index:-1}
+@keyframes br{0%{transform:scale(.4);opacity:1}100%{transform:scale(2.4);opacity:0}}
+.card.defendable,.card.transferable,.card.ready-attack{animation:gr 1.6s ease-in-out infinite}
+@keyframes gr{0%,100%{box-shadow:0 4px 14px var(--glow,#0006),0 0 0 0 currentColor;transform:translateY(0)}50%{box-shadow:0 4px 14px var(--glow,#0006),0 0 20px 4px currentColor;transform:translateY(-4px)}}
+.card.defendable{color:#2ecc71;border-color:#2ecc71}
+.card.transferable{color:#3498db;border-color:#3498db}
+.card.ready-attack{color:#ffd700;border-color:#ffd700}
+.card.covered{opacity:.72;margin-top:-40px;z-index:1}
+.card.covered::after{content:'✓';position:absolute;top:4px;right:8px;color:#2ecc71;font-size:24px;font-weight:bold;text-shadow:0 0 8px #000,0 0 12px #2ecc71;z-index:4;font-family:'Bangers',cursive}
+.card.cover-card{z-index:3;border-color:#2ecc71;box-shadow:0 0 16px rgba(46,204,113,.85)}
+.card-name{font-family:'Bangers',cursive;font-weight:normal;font-size:13px;text-align:center;color:#fff;min-height:24px;display:flex;align-items:center;justify-content:center;line-height:1;margin-bottom:3px;text-shadow:0 0 6px var(--c2,#000),2px 2px 0 #000,-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000;letter-spacing:.8px}
+.card.mini .card-name{font-size:11px;letter-spacing:.5px}
+.attr-row{display:flex;justify-content:space-between;padding:3px 6px;border-radius:4px;margin-bottom:2px;font-size:10.5px;font-weight:700;transition:all .15s;font-family:'Oswald',sans-serif;letter-spacing:.3px}
+.attr-row .attr-val{font-family:'Russo One',sans-serif;font-weight:bold;font-size:12px;text-shadow:0 0 6px currentColor,1px 1px 1px #000}
+.attr-row.pickable{cursor:pointer}
+.attr-row.pickable:hover{background:#ffd70066!important;transform:scale(1.05)}
+.attr-row.highlight{box-shadow:inset 0 0 0 2px #ffd700,0 0 12px rgba(255,215,0,.75);animation:pl 1.2s infinite}
+@keyframes pl{0%,100%{box-shadow:inset 0 0 0 2px #ffd700,0 0 12px rgba(255,215,0,.75)}50%{box-shadow:inset 0 0 0 2px #fff,0 0 22px rgba(255,255,255,.95)}}
+.btn{background:linear-gradient(145deg,#ffd700,#ff9900);color:#000;border:none;padding:12px 26px;border-radius:10px;font-weight:bold;cursor:pointer;font-size:15px;transition:transform .15s,box-shadow .15s;font-family:'Russo One',sans-serif;letter-spacing:.8px;box-shadow:0 4px 14px rgba(255,215,0,.45);text-transform:uppercase}
+.btn:hover{transform:scale(1.06) translateY(-2px);box-shadow:0 8px 24px rgba(255,215,0,.75)}
+.btn.take{background:linear-gradient(145deg,#e74c3c,#c0392b);color:#fff}
+.btn.bit{background:linear-gradient(145deg,#27ae60,#16a085);color:#fff;animation:bp 1.4s infinite;padding:15px 34px;font-size:17px}
+@keyframes bp{0%,100%{transform:scale(1);box-shadow:0 4px 14px rgba(39,174,96,.5)}50%{transform:scale(1.08);box-shadow:0 10px 30px rgba(39,174,96,1)}}
+#actions{display:flex;justify-content:center;gap:12px;min-height:55px;align-items:center;flex-wrap:wrap}
+#menu{position:fixed;inset:0;display:flex;justify-content:center;align-items:center;z-index:200;flex-direction:column;gap:14px;padding:20px}
+#menu.hidden{display:none}
+#menu h1{font-family:'Bangers',cursive;color:#ffd700;font-size:64px;letter-spacing:4px;margin-bottom:16px;text-align:center;text-shadow:0 0 24px rgba(255,215,0,.9),0 0 48px rgba(255,215,0,.5),4px 4px 0 #c0392b,6px 6px 0 #000;animation:tp 3s ease-in-out infinite}
+@keyframes tp{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
+#menu .menu-btn{padding:18px 44px;font-size:18px;min-width:340px}
+#menu .menu-btn.green{background:linear-gradient(145deg,#2ecc71,#16a085);color:#fff}
+#menu .menu-btn.blue{background:linear-gradient(145deg,#3498db,#2980b9);color:#fff}
+#menu .menu-btn.small-btn{padding:12px 28px;font-size:14px;min-width:220px;background:rgba(255,255,255,.08);color:#fff;box-shadow:none;border:1px solid rgba(255,255,255,.15);text-transform:none}
+#menu .menu-btn.small-btn:hover{background:rgba(255,255,255,.15)}
+#menu .hint{color:#ffd700;font-family:'Russo One',sans-serif;font-size:15px;margin-top:24px;text-align:center;max-width:560px;line-height:1.7;font-weight:bold;text-shadow:0 0 14px rgba(255,215,0,.9),0 0 28px rgba(255,215,0,.5);padding:14px 24px;border-radius:12px;border:1px solid rgba(255,215,0,.25);background:rgba(255,215,0,.05)}
+#menu .menu-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);display:flex;justify-content:center;align-items:center;z-index:260;padding:20px;backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .25s;overflow-y:auto}
+.modal-overlay.visible{opacity:1;pointer-events:auto}
+.modal-panel{background:linear-gradient(145deg,#2a2a5e,#1a1a3e);padding:30px 40px;border-radius:18px;text-align:left;border:2px solid #ffd700;max-width:560px;width:100%;box-shadow:0 0 60px rgba(255,215,0,.35);transform:scale(.85);transition:transform .3s cubic-bezier(.34,1.56,.64,1);max-height:88vh;overflow-y:auto;position:relative}
+.modal-overlay.visible .modal-panel{transform:scale(1)}
+.modal-panel h2{color:#ffd700;font-family:'Bangers',cursive;font-size:28px;letter-spacing:2px;margin-bottom:16px;text-align:center;text-shadow:0 0 14px rgba(255,215,0,.6),2px 2px 0 #000}
+.modal-panel h3{color:#ffd700;font-family:'Russo One',sans-serif;font-size:15px;margin:14px 0 8px;letter-spacing:1px}
+.modal-panel p,.modal-panel li{color:#ccc;font-size:14px;line-height:1.6}
+.modal-panel ul{padding-left:20px;margin:8px 0}
+.close-x{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;background:rgba(231,76,60,.9);color:#fff;border:none;font-size:18px;cursor:pointer;font-family:inherit;transition:transform .15s}
+.close-x:hover{transform:scale(1.15) rotate(90deg)}
+.settings-field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.settings-field label{font-size:12px;color:#aab;font-family:'Russo One',sans-serif;letter-spacing:.5px}
+.settings-field input,.settings-field select{background:#111;border:2px solid #ffd70044;color:#fff;padding:10px 14px;border-radius:8px;font-family:inherit;font-size:14px}
+.settings-field input:focus,.settings-field select:focus{outline:none;border-color:#ffd700}
+.avatar-upload{display:flex;align-items:center;gap:12px}
+.avatar-preview{width:60px;height:60px;border-radius:50%;overflow:hidden;border:2px solid #ffd70066;background:linear-gradient(145deg,#333,#111);display:flex;align-items:center;justify-content:center;font-size:28px;background-size:cover;background-position:center;flex-shrink:0}
+.avatar-upload input[type=file]{flex:1;background:#111;border:2px dashed #ffd70044;padding:8px;border-radius:8px;color:#fff;font-family:inherit;font-size:11px;cursor:pointer}
+.toggle-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0}
+.toggle-switch{width:48px;height:26px;border-radius:13px;background:#333;position:relative;cursor:pointer;transition:background .25s;border:1px solid #555}
+.toggle-switch.on{background:#2ecc71;border-color:#27ae60}
+.toggle-switch::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .25s;box-shadow:0 2px 4px rgba(0,0,0,.3)}
+.toggle-switch.on::after{transform:translateX(22px)}
+.rules-text{color:#ddd;font-family:'Oswald',sans-serif;font-size:14px;line-height:1.7}
+.rules-text b{color:#ffd700}
+#chatPanel{position:fixed;bottom:14px;right:14px;width:300px;background:linear-gradient(180deg,rgba(20,20,50,.98),rgba(10,10,30,.98));border-radius:14px;border:1px solid rgba(255,215,0,.3);box-shadow:0 8px 30px rgba(0,0,0,.7);z-index:220;display:none;flex-direction:column;max-height:340px;transform:translateY(20px);opacity:0;transition:all .3s}
+#chatPanel.visible{display:flex;transform:translateY(0);opacity:1}
+.chat-head{padding:8px 14px;border-bottom:1px solid rgba(255,215,0,.15);color:#ffd700;font-family:'Russo One',sans-serif;font-size:13px;display:flex;justify-content:space-between;align-items:center}
+.chat-body{flex:1;overflow-y:auto;padding:8px 12px;min-height:100px;max-height:180px;font-family:'Oswald',sans-serif;font-size:13px}
+.chat-msg{margin-bottom:5px;padding:4px 8px;border-radius:8px;word-break:break-word}
+.chat-msg.me{background:rgba(255,215,0,.12);border-left:3px solid #ffd700}
+.chat-msg.them{background:rgba(52,152,219,.12);border-left:3px solid #3498db}
+.chat-msg .who{color:#aaa;font-size:11px;margin-right:6px;font-weight:bold}
+.chat-input-row{display:flex;padding:8px;gap:6px;border-top:1px solid rgba(255,215,0,.15)}
+.chat-input-row input{flex:1;background:#111;border:1px solid #333;padding:7px 10px;border-radius:6px;color:#fff;font-family:inherit;font-size:12px}
+.chat-input-row input:focus{outline:none;border-color:#ffd70088}
+.chat-input-row button{background:linear-gradient(145deg,#ffd700,#ff9900);color:#000;border:none;padding:7px 12px;border-radius:6px;cursor:pointer;font-weight:bold;font-size:12px}
+.quick-bar{display:flex;flex-wrap:wrap;gap:4px;padding:6px 8px;border-top:1px solid rgba(255,215,0,.1)}
+.quick-bar button{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#ddd;padding:4px 8px;border-radius:5px;cursor:pointer;font-size:11px;font-family:inherit}
+.quick-bar button:hover{background:rgba(255,215,0,.15);color:#ffd700}
+#chatBtn{display:none}
+#chatBtn.on{display:inline-block}
+.emote-pop{position:fixed;font-size:48px;pointer-events:none;z-index:400;animation:ep 1.6s ease-out forwards}
+@keyframes ep{0%{transform:translateY(0) scale(.5);opacity:0}25%{transform:translateY(-30px) scale(1.2);opacity:1}100%{transform:translateY(-80px) scale(.7);opacity:0}}
+.achievement-pop{position:fixed;top:30px;right:30px;z-index:350;background:linear-gradient(145deg,#ffd700,#ff9900);color:#000;padding:14px 20px;border-radius:12px;box-shadow:0 10px 30px rgba(255,215,0,.7);font-family:'Russo One',sans-serif;font-size:14px;display:flex;align-items:center;gap:10px;animation:as .5s cubic-bezier(.34,1.56,.64,1);max-width:340px}
+@keyframes as{0%{transform:translateX(400px);opacity:0}100%{transform:translateX(0);opacity:1}}
+#timerBar{height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden;margin:0 auto;max-width:400px;display:none}
+#timerBar.on{display:block}
+#timerBar .fill{height:100%;background:linear-gradient(90deg,#2ecc71,#ffd700,#e74c3c);width:100%;transition:width 1s linear;border-radius:3px}
+#cardModal{position:fixed;inset:0;background:rgba(0,0,0,.92);display:flex;justify-content:center;align-items:center;z-index:250;padding:20px;backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity .25s;overflow-y:auto}
+#cardModal.visible{opacity:1;pointer-events:auto}
+#cardModal .modal-inner{position:relative;transform:scale(.75);transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+#cardModal.visible .modal-inner{transform:scale(1)}
+#cardModal .modal-close{position:absolute;top:-16px;right:-16px;width:44px;height:44px;border-radius:50%;background:linear-gradient(145deg,#e74c3c,#c0392b);color:#fff;border:2px solid #fff4;cursor:pointer;font-size:22px;font-weight:bold;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 22px rgba(231,76,60,.8);transition:transform .15s;z-index:10}
+.modal-card-wrap{display:flex;flex-direction:column;gap:14px;align-items:center}
+.modal-orig-img{width:340px;height:500px;border-radius:16px;background-size:contain;background-position:center;background-repeat:no-repeat;background-color:rgba(0,0,0,.5);border:2px solid #ffd70099;box-shadow:0 20px 60px rgba(0,0,0,.8),0 0 50px rgba(255,215,0,.4)}
+.modal-orig-img.no-img{display:flex;justify-content:center;align-items:center;font-size:120px;color:#333}
+.modal-stats{width:340px;background:linear-gradient(145deg,#1a1a3e,#0d0d24);border-radius:14px;padding:16px 18px;border:2px solid #ffd70055;box-shadow:0 8px 28px rgba(0,0,0,.6),0 0 24px rgba(255,215,0,.18)}
+.modal-title{color:#ffd700;font-family:'Bangers',cursive;font-size:26px;letter-spacing:2px;text-align:center;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid rgba(255,215,0,.2)}
+.modal-stat-row{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;margin-bottom:5px;background:rgba(0,0,0,.55);border-radius:8px;border-left:4px solid #888;font-size:14px;font-family:'Oswald',sans-serif}
+.modal-stat-row .msl{font-weight:500;color:#ddd}
+.modal-stat-row .msv{font-weight:bold;font-size:18px;font-family:'Russo One',monospace}
+.toast{position:fixed;bottom:40px;left:50%;transform:translateX(-50%) translateY(20px);background:linear-gradient(145deg,#2ecc71,#16a085);color:#fff;padding:14px 30px;border-radius:12px;font-weight:bold;box-shadow:0 10px 30px rgba(46,204,113,.7);z-index:300;opacity:0;transition:all .3s;pointer-events:none;font-size:15px;font-family:'Russo One',sans-serif}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#screenFlash{position:fixed;inset:0;pointer-events:none;z-index:400;background:radial-gradient(circle at 50% 50%,#fff 0%,transparent 70%);opacity:0;transition:opacity .35s}
+#screenFlash.flash{opacity:.35;transition:opacity .05s}
+.victory-spark{position:fixed;width:8px;height:8px;border-radius:50%;pointer-events:none;z-index:150;animation:sf 3s ease-in forwards}
+@keyframes sf{0%{transform:translateY(-20px) scale(1);opacity:1}100%{transform:translateY(100vh) scale(.3);opacity:0}}
+#emojiPanel{position:fixed;bottom:80px;right:14px;z-index:230;background:linear-gradient(180deg,rgba(20,20,50,.98),rgba(10,10,30,.98));border-radius:12px;padding:10px;border:1px solid rgba(255,215,0,.3);box-shadow:0 8px 30px rgba(0,0,0,.7);display:none;flex-wrap:wrap;gap:6px;width:220px}
+#emojiPanel.visible{display:flex}
+#emojiPanel button{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:#fff;width:38px;height:38px;border-radius:8px;cursor:pointer;font-size:20px;font-family:inherit;transition:all .15s}
+#emojiPanel button:hover{background:rgba(255,215,0,.2);transform:scale(1.1)}
+#overlay{position:fixed;inset:0;background:rgba(0,0,0,.9);display:flex;justify-content:center;align-items:center;z-index:100;padding:20px;backdrop-filter:blur(4px)}
+#overlay.hidden{display:none}
+#overlayContent{background:linear-gradient(145deg,#2a2a5e,#1a1a3e);padding:36px 46px;border-radius:18px;text-align:center;border:2px solid #ffd700;max-width:560px;box-shadow:0 0 60px rgba(255,215,0,.45)}
+#overlayContent h1{color:#ffd700;margin-bottom:16px;font-size:40px;font-family:'Bangers',cursive;letter-spacing:3px;text-shadow:0 0 20px rgba(255,215,0,.7),3px 3px 0 #000}
+#overlayContent p{margin-bottom:20px;line-height:1.6;color:#ddd;font-size:16px}
+#roomPanel{position:fixed;inset:0;background:rgba(0,0,0,.92);display:flex;justify-content:center;align-items:center;z-index:210;padding:20px;backdrop-filter:blur(4px)}
+#roomPanel.hidden{display:none}
+#roomPanel .panel{background:linear-gradient(145deg,#2a2a5e,#1a1a3e);padding:34px 44px;border-radius:18px;text-align:center;border:2px solid #ffd700;max-width:540px;width:100%;box-shadow:0 0 60px rgba(255,215,0,.3)}
+#roomPanel h2{color:#ffd700;margin-bottom:18px;font-size:24px;font-family:'Russo One',sans-serif}
+#roomPanel .codeBox{background:#000;padding:18px;border-radius:12px;margin:16px 0;font-family:'Courier New',monospace;font-size:36px;letter-spacing:10px;color:#2ecc71;text-shadow:0 0 14px #2ecc71;font-weight:bold}
+#roomPanel .linkBox{background:#111;padding:12px 16px;border-radius:8px;margin:12px 0;font-family:'Courier New',monospace;font-size:12px;color:#3498db;word-break:break-all;border:1px solid #3498db44;cursor:pointer}
+#roomPanel input{background:#111;border:2px solid #ffd70066;color:#fff;padding:16px 20px;border-radius:10px;font-size:24px;letter-spacing:8px;text-align:center;width:100%;font-family:'Russo One',monospace;text-transform:uppercase;margin:14px 0;font-weight:bold}
+#roomPanel input:focus{outline:none;border-color:#ffd700;box-shadow:0 0 22px rgba(255,215,0,.45)}
+#roomPanel .status{color:#aaa;font-size:14px;margin-top:14px;font-family:'Russo One',sans-serif}
+#roomPanel .status.waiting::after{content:'';display:inline-block;width:8px;height:8px;background:#2ecc71;border-radius:50%;margin-left:8px;animation:wb 1s infinite}
+@keyframes wb{0%,100%{opacity:1}50%{opacity:.2}}
+#roomPanel .btn{margin-top:12px}
+#roomPanel .btn.small{padding:9px 18px;font-size:13px}
+@media (max-width:900px){#menu h1{font-size:44px}.modal-orig-img{width:280px;height:410px}.modal-stats{width:280px;padding:12px}.modal-title{font-size:20px}.modal-stat-row{font-size:12px;padding:6px 10px}.modal-stat-row .msv{font-size:15px}}
+@media (max-width:700px){#tableArea{flex-direction:column;gap:8px}#deckVisual,#discardVisual{width:84px;height:122px}.deck-big,.discard-big{font-size:32px}#message{font-size:13px;padding:10px 16px}#menu h1{font-size:34px;letter-spacing:2px}#menu .menu-btn{min-width:260px;padding:16px 30px;font-size:16px}#turnIndicator{font-size:20px;padding:8px 14px;min-width:200px}#chatPanel{width:calc(100% - 28px);right:14px;left:14px;max-height:260px}}
+@media (max-width:500px){.modal-orig-img{width:240px;height:350px}.modal-stats{width:240px}.stat{font-size:11px;padding:5px 8px}.pName{font-size:11px}}
+#topBar{padding:5px 10px;gap:5px}
+#topBar .player-info{padding:3px 10px 3px 3px}
+#topBar .avatar{width:32px;height:32px;font-size:16px}
+#topBar .pName{font-size:11px}
+#topBar .pCount{font-size:17px}
+#topBar .stat{font-size:11px;padding:4px 8px}
+#topBar .icon-btn,#topBar .reset{padding:5px 8px;font-size:11px}
+#turnIndicator{padding:6px 16px;font-size:20px;letter-spacing:2px;min-width:200px;max-width:320px}
+#timerBar{max-width:320px}
+#tableArea{min-height:220px;padding:4px;gap:16px}
+#pileWrap{min-height:200px}
+#pileCards{min-height:200px;padding:6px;gap:12px}
+.pile-placeholder{padding:60px 30px;font-size:12px;letter-spacing:3px}
+#deckVisual,#discardVisual{width:84px;height:122px}
+#tableRight{gap:8px}
+.deck-big,.discard-big{font-size:30px}
+.deck-label-top,.discard-label-top{font-size:8px;letter-spacing:2px;top:6px}
+.deck-label,.discard-label{font-size:7px;letter-spacing:2px;bottom:6px}
+#message{font-size:12.5px;min-height:36px;padding:8px 18px;letter-spacing:.2px}
+#actions{min-height:42px;gap:8px}
+.btn{padding:9px 20px;font-size:13px;letter-spacing:.6px}
+.btn.bit{padding:11px 26px;font-size:14px}
+#overlayContent{padding:24px 32px}
+#overlayContent h1{font-size:30px;margin-bottom:10px}
+#overlayContent p{font-size:14px;margin-bottom:14px}
+.modal-orig-img{width:280px;height:412px}
+.modal-stats{width:280px;padding:12px}
+.modal-title{font-size:20px;margin-bottom:10px;padding-bottom:8px}
+.modal-stat-row{font-size:12px;padding:6px 10px;margin-bottom:4px}
+.modal-stat-row .msv{font-size:14px}
+@media (max-height:800px){
+.card{width:148px;height:208px}
+.card.mini{width:84px;height:118px}
+.card.has-img{margin-top:22px}
+.card.has-img .card-name{top:-22px;height:22px;font-size:12.5px}
+.card.mini.has-img{margin-top:18px}
+.card.mini.has-img .card-name{top:-18px;height:18px;font-size:9px}
+.hand{min-height:178px;padding-top:30px}
+#aiHand{min-height:148px;padding-top:22px}
+#tableArea{min-height:190px}
+#pileWrap{min-height:170px}
+#pileCards{min-height:170px}
+#deckVisual,#discardVisual{width:72px;height:105px}
+.deck-big,.discard-big{font-size:26px}
+#message{font-size:11.5px;padding:6px 14px;min-height:32px}
+#turnIndicator{font-size:18px;padding:5px 12px}
+.btn{padding:8px 16px;font-size:12px}
+.modal-orig-img{width:240px;height:352px}
+.modal-stats{width:240px}
+}
+@media (max-height:650px){
+.card{width:130px;height:184px;padding:4px}
+.card.mini{width:74px;height:104px}
+.card.has-img{margin-top:20px}
+.card.has-img .card-name{top:-20px;height:20px;font-size:11px;letter-spacing:.9px}
+.card.mini.has-img{margin-top:16px}
+.card.mini.has-img .card-name{top:-16px;height:16px;font-size:8px}
+.hand{min-height:154px;padding:2px 0;padding-top:26px}
+#aiHand{min-height:128px;padding-top:20px}
+#tableArea{min-height:160px;padding:2px}
+#pileWrap{min-height:140px}
+#pileCards{min-height:140px;gap:8px}
+.pile-placeholder{padding:40px 20px;font-size:10px}
+#deckVisual,#discardVisual{width:62px;height:90px}
+.deck-big,.discard-big{font-size:22px}
+#message{font-size:11px;padding:5px 12px;min-height:28px}
+#turnIndicator{font-size:15px;padding:4px 10px;min-width:160px}
+.btn{padding:7px 14px;font-size:11px}
+#topBar{padding:3px 8px}
+#topBar .stat{font-size:10px;padding:3px 6px}
+#topBar .pCount{font-size:14px}
+#topBar .avatar{width:26px;height:26px;font-size:13px}
+.attr-row{font-size:9px;padding:2px 4px}
+.attr-row .attr-val{font-size:10px}
+}
+</style>
+</head>
+<body class="scene-cosmic">
+<div id="bgLayer"><div class="rays"></div><div class="stars"></div><div class="cityLayer"></div><div class="gridLayer"></div></div>
+<div id="menu">
+<h1>МАРВЕЛ-ДУРАК</h1>
+<button class="btn menu-btn" onclick="startAIMode()">🤖 Играть с ИИ</button>
+<button class="btn menu-btn green" onclick="createRoom()">🌐 Создать онлайн-игру</button>
+<button class="btn menu-btn blue" onclick="showJoinRoom()">🔗 Присоединиться</button>
+<div class="menu-row">
+<button class="btn menu-btn small-btn" onclick="openRules()">📖 Правила</button>
+<button class="btn menu-btn small-btn" onclick="openStats()">📊 Статистика</button>
+<button class="btn menu-btn small-btn" onclick="openSettings()">⚙️ Настройки</button>
+<button class="btn menu-btn small-btn" onclick="openAchievements()">🏆 Достижения</button>
+</div>
+<div class="hint">Привет сладкий пенсель. Поностальгируем блять. ШУМУ ШУМУ6767</div>
+<div id="levelBar" style="margin-top:14px;text-align:center;font-family:'Russo One',sans-serif;font-size:12px;color:#aab"></div>
+</div>
+<div id="roomPanel" class="hidden"><div class="panel" id="roomPanelInner"></div></div>
+<div id="game">
+<div id="topBar">
+<div class="player-info enemy" id="enemyInfo"><div class="avatar" id="enemyAvatar">🤖</div><div><div class="pName" id="enemyName">ПРОТИВНИК</div><div class="pCount"><b id="aiCount">6</b></div></div></div>
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;flex:1">
+<div class="stat">🃏 <b id="deckCount">0</b></div>
+<div class="stat">🗑️ <b id="discardCount">0</b></div>
+<div class="stat gold">🏆 <b id="sessionWins">0</b>/<b id="sessionTarget">1</b></div>
+<div class="stat red">💀 <b id="sessionLosses">0</b></div>
+<div class="stat gold">⭐ <b id="xpValue">0</b></div>
+<div class="stat online" id="connStatus" style="display:none">🌐 <b>—</b></div>
+</div>
+<div class="player-info" id="myInfo"><div class="avatar" id="myAvatar">👤</div><div><div class="pName" id="myName">ИГРОК</div><div class="pCount" style="color:#2ecc71"><b id="myCount">6</b></div></div></div>
+<button class="icon-btn" id="chatBtn" onclick="toggleChat()">💬</button>
+<button class="icon-btn" id="emojiBtn" onclick="toggleEmoji()">😀</button>
+<button class="icon-btn" onclick="resetStats()">↺</button>
+<button class="icon-btn" id="soundBtn" onclick="toggleSound()">🔊</button>
+<button class="icon-btn" onclick="backToMenu()">🏠</button>
+</div>
+<div id="turnIndicator" class="my">ТВОЙ ХОД</div>
+<div id="timerBar"><div class="fill" id="timerFill"></div></div>
+<div id="aiHand" class="hand"></div>
+<div id="tableArea">
+<div id="pileWrap"><div id="pileCards"></div></div>
+<div id="tableRight">
+<div id="deckVisual">
+<div class="deck-card d4"></div><div class="deck-card d3"></div><div class="deck-card d2"></div><div class="deck-card d1"></div>
+<div class="deck-card d0"><div class="deck-label-top">КОЛОДА</div><div class="deck-big" id="deckBig">0</div><div class="deck-label">CARDS</div></div>
+</div>
+<div id="discardVisual"><div class="discard-card"><div class="discard-label-top">СБРОС</div><div class="discard-big" id="discardBig">0</div><div class="discard-label">CARDS</div></div></div>
+</div>
+</div>
+<div id="message"></div>
+<div id="actions"></div>
+<div id="playerHand" class="hand"></div>
+</div>
+<div id="overlay" class="hidden"><div id="overlayContent"></div></div>
+<div id="toast" class="toast"></div>
+<div id="screenFlash"></div>
+<div id="cardModal" onclick="closeCardModal(event)"><div class="modal-inner" onclick="event.stopPropagation()"><button class="modal-close" onclick="closeCardModal(event)">✕</button><div id="cardModalContent"></div></div></div>
+<div id="uiModal" class="modal-overlay" onclick="closeUiModal(event)"><div class="modal-panel" onclick="event.stopPropagation()"><button class="close-x" onclick="closeUiModal(event)">✕</button><div id="uiModalContent"></div></div></div>
+<div id="chatPanel"><div class="chat-head"><span>💬 Чат</span><button class="icon-btn" style="padding:2px 8px;font-size:12px" onclick="toggleChat()">✕</button></div><div class="chat-body" id="chatBody"></div><div class="quick-bar" id="quickBar"></div><div class="chat-input-row"><input id="chatInput" maxlength="120" placeholder="Написать..." onkeydown="if(event.key==='Enter')sendChat()"><button onclick="sendChat()">▶</button></div></div>
+<div id="emojiPanel"></div>
+<script>
+var audioCtx=null,soundEnabled=true;
+function initAudio(){if(audioCtx)return;try{audioCtx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}
+function beep(f,d,t,v){if(!soundEnabled||!audioCtx)return;try{var n=audioCtx.currentTime,o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=t||'sine';o.frequency.setValueAtTime(f,n);g.gain.setValueAtTime(0,n);g.gain.linearRampToValueAtTime(v||0.07,n+0.01);g.gain.exponentialRampToValueAtTime(0.001,n+d);o.connect(g);g.connect(audioCtx.destination);o.start(n);o.stop(n+d+0.02)}catch(e){}}
+function sweep(f1,f2,d,t,v){if(!soundEnabled||!audioCtx)return;try{var n=audioCtx.currentTime,o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=t||'sine';o.frequency.setValueAtTime(f1,n);o.frequency.exponentialRampToValueAtTime(f2,n+d);g.gain.setValueAtTime(0,n);g.gain.linearRampToValueAtTime(v||0.08,n+0.01);g.gain.exponentialRampToValueAtTime(0.001,n+d);o.connect(g);g.connect(audioCtx.destination);o.start(n);o.stop(n+d+0.02)}catch(e){}}
+function noise(d,v){if(!soundEnabled||!audioCtx)return;try{var n=audioCtx.currentTime,size=Math.floor(audioCtx.sampleRate*d),buf=audioCtx.createBuffer(1,size,audioCtx.sampleRate),data=buf.getChannelData(0);for(var i=0;i<size;i++)data[i]=(Math.random()*2-1)*Math.pow(1-i/size,2);var src=audioCtx.createBufferSource(),g=audioCtx.createGain();src.buffer=buf;g.gain.setValueAtTime(v||0.15,n);g.gain.exponentialRampToValueAtTime(0.001,n+d);src.connect(g);g.connect(audioCtx.destination);src.start(n)}catch(e){}}
+var SOUNDS={attack:function(){sweep(300,700,0.18,'square',0.06)},transfer:function(){sweep(600,1200,0.22,'triangle',0.08)},cover:function(){sweep(500,900,0.16,'sine',0.07)},take:function(){noise(0.25,0.15);setTimeout(function(){beep(250,0.12,'sine',0.08)},60)},bit:function(){sweep(700,1400,0.32,'triangle',0.09);setTimeout(function(){sweep(1100,1600,0.22,'sine',0.07)},100)},win:function(){[523,659,784,1047].forEach(function(f,i){setTimeout(function(){beep(f,0.18,'sine',0.09)},i*130)})},lose:function(){[400,350,280,200].forEach(function(f,i){setTimeout(function(){beep(f,0.22,'sawtooth',0.07)},i*150)})},click:function(){beep(700,0.06,'square',0.04)},zoom:function(){sweep(500,1200,0.15,'sine',0.05)}};
+function play(n){initAudio();if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();if(SOUNDS[n])SOUNDS[n]()}
+function toggleSound(){soundEnabled=!soundEnabled;var b=document.getElementById('soundBtn');b.textContent=soundEnabled?'🔊':'🔇';b.classList.toggle('off',!soundEnabled);saveSetting('sound',soundEnabled);if(soundEnabled)play('click')}
+function showToast(t){var e=document.getElementById('toast');e.textContent=t;e.classList.add('show');setTimeout(function(){e.classList.remove('show')},1800)}
+function flashScreen(){var f=document.getElementById('screenFlash');f.classList.add('flash');setTimeout(function(){f.classList.remove('flash')},80)}
+function victorySparks(){for(var i=0;i<40;i++)(function(){var s=document.createElement('div');s.className='victory-spark';var c=['#ffd700','#ff9900','#2ecc71','#3498db','#e74c3c','#fff'];s.style.background=c[Math.floor(Math.random()*c.length)];s.style.left=Math.random()*100+'%';s.style.top='-20px';s.style.animationDelay=(Math.random()*1.5)+'s';s.style.boxShadow='0 0 8px currentColor';document.body.appendChild(s);setTimeout(function(){if(s.parentNode)s.parentNode.removeChild(s)},4500)})()}
+function showEmotePop(e){var el=document.createElement('div');el.className='emote-pop';el.textContent=e;el.style.left=(30+Math.random()*40)+'%';el.style.top=(40+Math.random()*20)+'%';document.body.appendChild(el);setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el)},1700)}
+function getSetting(k,d){try{var v=localStorage.getItem('md_'+k);return v===null?d:JSON.parse(v)}catch(e){return d}}
+function saveSetting(k,v){try{localStorage.setItem('md_'+k,JSON.stringify(v))}catch(e){}}
+function getStats(){try{var s=localStorage.getItem('marvelDurakStats');if(s)return JSON.parse(s)}catch(e){}return{wins:0,losses:0,draws:0,games:0,heroesPlayed:{},totalXP:0,streak:0,bestStreak:0,achievements:[]}}
+function saveStats(s){try{localStorage.setItem('marvelDurakStats',JSON.stringify(s))}catch(e){}}
+function updateStatsBar(){var s=getStats();var lvl=Math.floor(Math.sqrt((s.totalXP||0)/50))+1;var xN=lvl*lvl*50,xC=(lvl-1)*(lvl-1)*50,xI=(s.totalXP||0)-xC,xU=xN-xC;var el=document.getElementById('levelBar');if(el)el.innerHTML='⭐ Уровень '+lvl+' · '+xI+'/'+xU+' XP';var xv=document.getElementById('xpValue');if(xv)xv.textContent=s.totalXP||0}
+function addXP(a){var s=getStats();var oL=Math.floor(Math.sqrt((s.totalXP||0)/50))+1;s.totalXP=(s.totalXP||0)+a;var nL=Math.floor(Math.sqrt(s.totalXP/50))+1;saveStats(s);if(nL>oL)showToast('🎉 Новый уровень: '+nL+'!');updateStatsBar()}
+function resetStats(){if(!confirm('Сбросить всю статистику?'))return;saveStats({wins:0,losses:0,draws:0,games:0,heroesPlayed:{},totalXP:0,streak:0,bestStreak:0,achievements:[]});updateStatsBar();play('click');showToast('✓ Сброшено')}
+var ACHIEVEMENTS=[{id:'first',icon:'🎮',name:'Первый шаг',desc:'Сыграть первую партию',check:function(s){return(s.games||0)>=1}},{id:'win1',icon:'🏆',name:'Первая победа',desc:'Выиграть 1 партию',check:function(s){return(s.wins||0)>=1}},{id:'win10',icon:'🔥',name:'Разгром',desc:'Выиграть 10 партий',check:function(s){return(s.wins||0)>=10}},{id:'win50',icon:'👑',name:'Легенда',desc:'Выиграть 50 партий',check:function(s){return(s.wins||0)>=50}},{id:'loss10',icon:'💀',name:'Стойкий',desc:'Проиграть 10 партий',check:function(s){return(s.losses||0)>=10}},{id:'streak3',icon:'⚡',name:'Три в ряд',desc:'Победить 3 раза подряд',check:function(s){return(s.bestStreak||0)>=3}},{id:'streak5',icon:'⚔️',name:'Пятёрка',desc:'Победить 5 раз подряд',check:function(s){return(s.bestStreak||0)>=5}},{id:'games20',icon:'🎯',name:'Опытный',desc:'Сыграть 20 партий',check:function(s){return(s.games||0)>=20}},{id:'games100',icon:'💎',name:'Ветеран',desc:'Сыграть 100 партий',check:function(s){return(s.games||0)>=100}},{id:'collector',icon:'🎨',name:'Коллекционер',desc:'Сыграть 20 героями',check:function(s){return Object.keys(s.heroesPlayed||{}).length>=20}},{id:'lvl10',icon:'🌟',name:'Мастер',desc:'Достичь 10 уровня',check:function(s){return Math.floor(Math.sqrt((s.totalXP||0)/50))+1>=10}}];
+function checkAchievements(){var s=getStats(),got=s.achievements||[],newOnes=[];ACHIEVEMENTS.forEach(function(a){if(got.indexOf(a.id)===-1&&a.check(s)){got.push(a.id);newOnes.push(a)}});if(newOnes.length>0){s.achievements=got;saveStats(s);newOnes.forEach(function(a,i){setTimeout(function(){showAchPopup(a.icon+' '+a.name,a.desc)},i*800)})}}
+function showAchPopup(t,d){var el=document.createElement('div');el.className='achievement-pop';el.innerHTML='<div style="font-size:28px">🏆</div><div><div style="font-weight:bold">Достижение!</div><div style="font-size:13px">'+t+'</div><div style="font-size:11px;opacity:0.7;margin-top:3px">'+d+'</div></div>';document.body.appendChild(el);setTimeout(function(){el.classList.add('hide');setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el)},600)},4000)}
+var ATTRS=[{key:'intellect',name:'Интеллект',short:'ИНТ',color:'#8e44ad',icon:'🧠'},{key:'strength',name:'Сила',short:'СИЛ',color:'#c0392b',icon:'💪'},{key:'speed',name:'Скорость',short:'СКР',color:'#d35400',icon:'⚡'},{key:'special',name:'Особые Умения',short:'ОСО',color:'#2980b9',icon:'✨'},{key:'combat',name:'Бойцовские Навыки',short:'БОЙ',color:'#16a085',icon:'🥊'}];
+var HERO_THEMES={'Чёрная Вдова':{c1:'#c0392b',c2:'#ecf0f1',icon:'🕸️',fx:'float'},'Дядюшка Бен':{c1:'#3498db',c2:'#ecf0f1',icon:'👴',fx:'shield'},'Паразит':{c1:'#27ae60',c2:'#f1c40f',icon:'👹',fx:'rage'},'Доктор Дум':{c1:'#27ae60',c2:'#7f8c8d',icon:'🎭',fx:'tech'},'Водяной':{c1:'#3498db',c2:'#85c1e9',icon:'💧',fx:'mystic'},'Гризли':{c1:'#d35400',c2:'#8b4513',icon:'🐻',fx:'brute'},'Человек-лёд':{c1:'#3498db',c2:'#ecf0f1',icon:'❄️',fx:'tech'},'Шакал':{c1:'#27ae60',c2:'#f1c40f',icon:'🐺',fx:'rage'},'Гвен Стейси':{c1:'#3498db',c2:'#f1c40f',icon:'👱',fx:'float'},'Ястребиный глаз':{c1:'#7d3c98',c2:'#c0392b',icon:'🏹',fx:'float'},'Мадам Паутина':{c1:'#7d3c98',c2:'#c0392b',icon:'🕷️',fx:'mystic'},'Кенгуру':{c1:'#d35400',c2:'#f1c40f',icon:'🦘',fx:'brute'},'Женщина-паук':{c1:'#c0392b',c2:'#f1c40f',icon:'🕷️',fx:'float'},'Твёрдый лоб':{c1:'#34495e',c2:'#c0392b',icon:'🔨',fx:'brute'},'Шокер':{c1:'#f1c40f',c2:'#2c3e50',icon:'🔫',fx:'tech'},'Стегрон':{c1:'#27ae60',c2:'#7f8c8d',icon:'🦖',fx:'brute'},'Синяя птица':{c1:'#2471a3',c2:'#85c1e9',icon:'🐦',fx:'float'},'Аркейд':{c1:'#c0392b',c2:'#f1c40f',icon:'🎪',fx:'rage'},'Доктор Осьминог':{c1:'#27ae60',c2:'#f1c40f',icon:'🐙',fx:'mystic'},'Белый кролик':{c1:'#ecf0f1',c2:'#c0392b',icon:'🐰',fx:'mystic'},'Жёлтый жакет':{c1:'#f1c40f',c2:'#2c3e50',icon:'⚡',fx:'lightning'},'Капитан Британия':{c1:'#c0392b',c2:'#2471a3',icon:'🛡️',fx:'shield'},'Лунный рыцарь':{c1:'#c0c0c0',c2:'#ecf0f1',icon:'🌙',fx:'shadow'},'Кукловод':{c1:'#c0392b',c2:'#f1c40f',icon:'🎭',fx:'mystic'},'Бетти Брэнт':{c1:'#e67e22',c2:'#f1c40f',icon:'📰',fx:'float'},'Красный Череп':{c1:'#c0392b',c2:'#8e44ad',icon:'💀',fx:'rage'},'Робби Робертсон':{c1:'#34495e',c2:'#ecf0f1',icon:'📰',fx:'tech'},'Кейдж':{c1:'#f1c40f',c2:'#1c1c1c',icon:'⛓️',fx:'brute'},'Сердце':{c1:'#3498db',c2:'#ecf0f1',icon:'⚡',fx:'tech'},'Суперскрулл':{c1:'#f1c40f',c2:'#8e44ad',icon:'👽',fx:'cosmic'},'Кейн':{c1:'#8e44ad',c2:'#1c1c1c',icon:'🕷️',fx:'shadow'},'Червь разума':{c1:'#7f8c8d',c2:'#27ae60',icon:'🧠',fx:'mystic'},'Туманный рыцарь':{c1:'#8e44ad',c2:'#2c3e50',icon:'🌫️',fx:'shadow'},'Искра':{c1:'#ec4899',c2:'#ffd700',icon:'🎤',fx:'lightning'},'Расплавленный человек':{c1:'#f1c40f',c2:'#d35400',icon:'🔥',fx:'rage'},'Джаггернаут':{c1:'#c0392b',c2:'#1c1c1c',icon:'💪',fx:'brute'},'Кошмар':{c1:'#27ae60',c2:'#1c1c1c',icon:'👻',fx:'mystic'},'Пума':{c1:'#f1c40f',c2:'#d35400',icon:'🐆',fx:'shadow'}};
+var CARDS_DATA=[['Чёрная Вдова',208,127,131,158,349,'cards/Черная Вдова.png'],['Дядюшка Бен',130,71,112,54,68,'cards/Дядюшка Бен.png'],['Паразит',112,164,186,68,139,'cards/Паразит.png'],['Доктор Дум',424,282,350,413,271,'cards/Доктор Дум.png'],['Водяной',74,96,136,243,142,'cards/Водяной.png'],['Гризли',123,245,143,72,202,'cards/Гризли.png'],['Человек-лёд',126,114,203,327,146,'cards/Человек-Лед.png'],['Шакал',276,273,132,70,199,'cards/Шакал.png'],['Гвен Стейси',139,83,137,25,32,'cards/Гвен Стейси.png'],['Ястребиный глаз',129,143,136,58,286,'cards/Ястребиный Глаз.png'],['Мадам Паутина',274,60,71,53,68,'cards/Мадам Паутина.png'],['Кенгуру',73,205,213,61,137,'cards/Кенгуру.png'],['Женщина-паук',137,230,199,265,276,'cards/Женщина-Паук.png'],['Твёрдый лоб',75,92,83,62,138,'cards/Твердый Лоб.png'],['Шокер',142,136,127,276,119,'cards/Шокер.png'],['Стегрон',303,227,185,59,137,'cards/Стегрон.png'],['Синяя птица',97,83,106,72,142,'cards/Синяя Птица.png'],['Аркейд',357,135,128,84,141,'cards/Аркейд.png'],['Доктор Осьминог',327,141,127,66,285,'cards/Доктор Осьминог.png'],['Белый кролик',124,99,136,72,84,'cards/Белый Кролик.png'],['Жёлтый жакет',389,419,345,372,200,'cards/Желтый Жакет.png'],['Капитан Британия',286,423,296,228,276,'cards/Капитан Британия.png'],['Лунный рыцарь',153,159,202,63,277,'cards/Лунный Рыцарь.png'],['Кукловод',219,136,85,347,93,'cards/Кукловод.png'],['Бетти Брэнт',261,42,132,64,139,'cards/Бетти Брэнт.png'],['Красный Череп',345,210,138,97,415,'cards/Красный Череп.png'],['Робби Робертсон',197,138,128,36,142,'cards/Робби Робертсон.png'],['Кейдж',136,227,136,73,279,'cards/Кейдж.png'],['Сердце',203,278,214,306,210,'cards/Сердце.png'],['Суперскрулл',85,428,367,428,275,'cards/Суперскрулл.png'],['Кейн',274,285,198,99,289,'cards/Кейн.png'],['Червь разума',344,409,373,487,382,'cards/Червь Разума.png'],['Туманный рыцарь',139,226,143,84,150,'cards/Туманный Рыцарь.png'],['Искра',140,139,87,275,168,'cards/Искра.png'],['Расплавленный человек',85,348,133,128,210,'cards/Расплавленный Человек.png'],['Джаггернаут',136,499,101,85,212,'cards/Джаггернаут.png'],['Кошмар',198,139,497,401,145,'cards/Кошмар.png'],['Пума',187,279,133,87,348,'cards/Пума.png']];
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
+function attrName(k){for(var i=0;i<ATTRS.length;i++)if(ATTRS[i].key===k)return ATTRS[i].name;return k}
+function newCard(d){return{id:Math.random().toString(36).slice(2)+Date.now().toString(36),name:d[0],intellect:d[1],strength:d[2],speed:d[3],special:d[4],combat:d[5],img:d[6]||null}}
+function buildDeck(){var d=[];for(var c=0;c<2;c++)for(var i=0;i<CARDS_DATA.length;i++)d.push(newCard(CARDS_DATA[i]));return shuffle(d)}
+function hexToRgba(h,a){h=h.replace('#','');if(h.length===3)h=h.split('').map(function(c){return c+c}).join('');return'rgba('+parseInt(h.slice(0,2),16)+','+parseInt(h.slice(2,4),16)+','+parseInt(h.slice(4,6),16)+','+a+')'}
+function openCardModal(card){if(!card||!card.name)return;play('zoom');var theme=HERO_THEMES[card.name]||{c1:'#444',c2:'#888'};var wrap=document.createElement('div');wrap.className='modal-card-wrap';if(card.img){var i=document.createElement('div');i.className='modal-orig-img';i.style.backgroundImage='url("'+card.img+'")';wrap.appendChild(i)}else{var n=document.createElement('div');n.className='modal-orig-img no-img';n.textContent='❔';wrap.appendChild(n)}var st=document.createElement('div');st.className='modal-stats';var t=document.createElement('div');t.className='modal-title';t.textContent=card.name;t.style.textShadow='0 0 16px '+theme.c2+', 2px 2px 0 #000';st.appendChild(t);for(var i=0;i<ATTRS.length;i++)(function(a){var r=document.createElement('div');r.className='modal-stat-row';r.style.borderLeftColor=a.color;var l=document.createElement('span');l.className='msl';l.textContent=a.icon+' '+a.name;r.appendChild(l);var v=document.createElement('span');v.className='msv';v.textContent=card[a.key];v.style.color=a.color;v.style.textShadow='0 0 10px '+a.color;r.appendChild(v);st.appendChild(r)})(ATTRS[i]);wrap.appendChild(st);var c=document.getElementById('cardModalContent');c.innerHTML='';c.appendChild(wrap);document.getElementById('cardModal').classList.add('visible')}
+function closeCardModal(e){if(e)e.stopPropagation();document.getElementById('cardModal').classList.remove('visible');play('click')}
+function openUiModal(h){document.getElementById('uiModalContent').innerHTML=h;document.getElementById('uiModal').classList.add('visible')}
+function closeUiModal(e){if(e)e.stopPropagation();document.getElementById('uiModal').classList.remove('visible');play('click')}
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeCardModal();closeUiModal()}});
+function openRules(){play('click');openUiModal('<h2>📖 Как играть</h2><div class="rules-text"><p>Игра похожа на <b>переводного Дурака</b>, но вместо мастей — характеристики героев.</p><h3>🎯 Цель</h3><p>Первым сбросить все свои карты.</p><h3>🎮 Ход</h3><ul><li>Кто первым ходит — по наименьшему атрибуту.</li><li><b>Атака:</b> клик по атрибуту карты.</li><li><b>Отбой:</b> картой с той же характеристикой, но <b>больше</b>.</li><li><b>Перевод:</b> картой с <b>точно таким же</b> значением.</li><li>Не можешь отбить — жми <b>📥 Взять карты</b>.</li><li><b>✋ Бито</b> — подтверждение, что всё отбито.</li></ul><h3>🔍 Зум</h3><p>Клик по 🔍 открывает карту крупно.</p></div>')}
+function openStats(){play('click');var s=getStats(),lvl=Math.floor(Math.sqrt((s.totalXP||0)/50))+1,total=(s.wins||0)+(s.losses||0)+(s.draws||0),wr=total>0?Math.round((s.wins||0)/total*100):0,heroes=s.heroesPlayed||{},topH=Object.keys(heroes).sort(function(a,b){return heroes[b]-heroes[a]}).slice(0,5),hHTML=topH.length>0?topH.map(function(h){return'<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06)"><span>'+h+'</span><span style="color:#ffd700">'+heroes[h]+'</span></div>'}).join(''):'<p style="color:#666">Пока нет данных</p>';openUiModal('<h2>📊 Статистика</h2><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px"><div style="background:rgba(46,204,113,0.1);padding:14px;border-radius:10px;text-align:center;border:1px solid rgba(46,204,113,0.3)"><div style="font-size:32px;font-family:Bangers,cursive;color:#2ecc71">'+(s.wins||0)+'</div><div style="font-size:12px;color:#888">Побед</div></div><div style="background:rgba(231,76,60,0.1);padding:14px;border-radius:10px;text-align:center;border:1px solid rgba(231,76,60,0.3)"><div style="font-size:32px;font-family:Bangers,cursive;color:#e74c3c">'+(s.losses||0)+'</div><div style="font-size:12px;color:#888">Поражений</div></div><div style="background:rgba(255,215,0,0.1);padding:14px;border-radius:10px;text-align:center;border:1px solid rgba(255,215,0,0.3)"><div style="font-size:32px;font-family:Bangers,cursive;color:#ffd700">'+wr+'%</div><div style="font-size:12px;color:#888">Винрейт</div></div><div style="background:rgba(52,152,219,0.1);padding:14px;border-radius:10px;text-align:center;border:1px solid rgba(52,152,219,0.3)"><div style="font-size:32px;font-family:Bangers,cursive;color:#3498db">'+lvl+'</div><div style="font-size:12px;color:#888">Уровень</div></div></div><h3>🔥 Любимые герои</h3>'+hHTML+'<h3 style="margin-top:18px">📈 Всего партий</h3><p style="font-size:20px;color:#ffd700;font-family:Russo One,sans-serif">'+total+'</p>')}
+function openSettings(){play('click');var name=getSetting('playerName','Игрок'),av=getSetting('playerAvatar',null),scene=getSetting('scene','cosmic'),series=getSetting('seriesBest',1),timer=getSetting('timerEnabled',false),timerSec=getSetting('timerSeconds',30);var h='<h2>⚙️ Настройки</h2><div class="settings-field"><label>Твоё имя</label><input id="setName" value="'+(name+'').replace(/"/g,'&quot;')+'" maxlength="20"></div><div class="settings-field"><label>Аватар</label><div class="avatar-upload"><div class="avatar-preview" id="setAvatarPrev"'+(av?' style="background-image:url('+av+')"':'')+'>'+(av?'':'👤')+'</div><input type="file" id="setAvatarFile" accept="image/*">'+(av?'<button class="icon-btn" onclick="clearAvatar()">✕</button>':'')+'</div></div><div class="settings-field"><label>Фон</label><select id="setScene"><option value="cosmic"'+(scene==='cosmic'?' selected':'')+'>🌌 Космос</option><option value="city"'+(scene==='city'?' selected':'')+'>🌃 Нью-Йорк</option><option value="lab"'+(scene==='lab'?' selected':'')+'>🧪 Лаборатория</option><option value="daily"'+(scene==='daily'?' selected':'')+'>🌑 Минимализм</option><option value="comic"'+(scene==='comic'?' selected':'')+'>💥 Комиксный взрыв</option><option value="mystic"'+(scene==='mystic'?' selected':'')+'>🔮 Магический портал</option></select></div><div class="settings-field"><label>Серия партий</label><select id="setSeries"><option value="1"'+(series==1?' selected':'')+'>Одиночная</option><option value="3"'+(series==3?' selected':'')+'>До 3 побед</option><option value="5"'+(series==5?' selected':'')+'>До 5 побед</option><option value="10"'+(series==10?' selected':'')+'>До 10 побед</option></select></div><div class="toggle-row"><span>⏱️ Таймер на ход</span><div class="toggle-switch'+(timer?' on':'')+'" id="setTimerToggle"></div></div><div class="settings-field" id="timerSecField" style="'+(timer?'':'display:none;')+'"><label>Секунд на ход</label><select id="setTimerSec">'+[15,20,30,45,60].map(function(n){return'<option value="'+n+'"'+(timerSec==n?' selected':'')+'>'+n+' сек</option>'}).join('')+'</select></div><button class="btn" style="width:100%;margin-top:16px" onclick="saveSettings()">💾 Сохранить</button>';openUiModal(h);setTimeout(function(){var f=document.getElementById('setAvatarFile');if(f)f.addEventListener('change',onAvatarFile);var t=document.getElementById('setTimerToggle');if(t)t.onclick=function(){t.classList.toggle('on');document.getElementById('timerSecField').style.display=t.classList.contains('on')?'':'none'}},50)}
+function onAvatarFile(e){var file=e.target.files[0];if(!file)return;var reader=new FileReader();reader.onload=function(ev){var img=new Image();img.onload=function(){var c=document.createElement('canvas');c.width=128;c.height=128;var cx=c.getContext('2d'),s=Math.min(img.width,img.height),sx=(img.width-s)/2,sy=(img.height-s)/2;cx.drawImage(img,sx,sy,s,s,0,0,128,128);var d=c.toDataURL('image/jpeg',0.75);var prev=document.getElementById('setAvatarPrev');if(prev){prev.style.backgroundImage='url('+d+')';prev.textContent=''}window._pendingAvatar=d};img.src=ev.target.result};reader.readAsDataURL(file)}
+function clearAvatar(){window._pendingAvatar=null;var p=document.getElementById('setAvatarPrev');if(p){p.style.backgroundImage='';p.textContent='👤'}}
+function saveSettings(){var name=document.getElementById('setName').value.trim()||'Игрок',scene=document.getElementById('setScene').value,series=parseInt(document.getElementById('setSeries').value)||1,timer=document.getElementById('setTimerToggle').classList.contains('on'),ts=document.getElementById('setTimerSec');saveSetting('playerName',name);saveSetting('scene',scene);saveSetting('seriesBest',series);saveSetting('timerEnabled',timer);saveSetting('timerSeconds',ts?parseInt(ts.value):30);if(window._pendingAvatar!==undefined){saveSetting('playerAvatar',window._pendingAvatar);window._pendingAvatar=undefined}applySettingsToUI();closeUiModal();showToast('✓ Сохранено');play('click')}
+function applySettingsToUI(){var name=getSetting('playerName','Игрок'),av=getSetting('playerAvatar',null),scene=getSetting('scene','cosmic');document.body.classList.remove('scene-city','scene-lab','scene-daily','scene-comic','scene-mystic','scene-cosmic');if(scene==='city')document.body.classList.add('scene-city');else if(scene==='lab')document.body.classList.add('scene-lab');else if(scene==='daily')document.body.classList.add('scene-daily');else if(scene==='comic')document.body.classList.add('scene-comic');else if(scene==='mystic')document.body.classList.add('scene-mystic');else document.body.classList.add('scene-cosmic');var mn=document.getElementById('myName');if(mn)mn.textContent=name.toUpperCase();var ma=document.getElementById('myAvatar');if(ma){if(av){ma.style.backgroundImage='url('+av+')';ma.textContent=''}else{ma.style.backgroundImage='';ma.textContent='👤'}}var st=document.getElementById('sessionTarget');if(st)st.textContent=getSetting('seriesBest',1);updateStatsBar()}
+function openAchievements(){play('click');var s=getStats(),got=s.achievements||[];var html='<h2>🏆 Достижения</h2><p style="color:#aaa;text-align:center;margin-bottom:16px">Открыто: <b style="color:#ffd700">'+got.length+' / '+ACHIEVEMENTS.length+'</b></p>';ACHIEVEMENTS.forEach(function(a){var u=got.indexOf(a.id)!==-1;html+='<div style="display:flex;align-items:center;gap:12px;padding:10px;margin-bottom:8px;border-radius:10px;background:'+(u?'rgba(255,215,0,0.1)':'rgba(255,255,255,0.03)')+';border:1px solid '+(u?'rgba(255,215,0,0.35)':'rgba(255,255,255,0.06)')+';opacity:'+(u?'1':'0.5')+'"><div style="font-size:32px;width:44px;text-align:center;filter:'+(u?'none':'grayscale(1)')+'">'+a.icon+'</div><div style="flex:1"><div style="font-family:Russo One,sans-serif;font-size:14px;color:'+(u?'#ffd700':'#888')+'">'+a.name+'</div><div style="font-size:12px;color:#999;margin-top:2px">'+a.desc+'</div></div>'+(u?'<div style="color:#2ecc71;font-size:20px">✓</div>':'')+'</div>'});openUiModal(html)}
+var state={},isHost=false,peer=null,conn=null,roomCode='',mode='menu',sessionWins=0,sessionLosses=0,timerInterval=null,timerSecondsLeft=0;
+function resetState(){state={deck:[],playerHand:[],aiHand:[],discard:[],pile:[],turn:null,phase:'setup',message:'',remoteMessage:'',lastPlayedId:null,bitWinner:null}}
+function resetSession(){sessionWins=0;sessionLosses=0;updateSessionUI()}
+function updateSessionUI(){document.getElementById('sessionWins').textContent=sessionWins;document.getElementById('sessionLosses').textContent=sessionLosses;document.getElementById('myCount').textContent=state.playerHand.length}
+function startAIMode(){mode='ai';resetSession();document.getElementById('menu').classList.add('hidden');document.getElementById('roomPanel').classList.add('hidden');document.getElementById('connStatus').style.display='none';document.getElementById('chatBtn').style.display='none';document.getElementById('emojiBtn').style.display='none';document.getElementById('enemyName').textContent='ИИ';resetState();dealCards();updateStatsBar();updateSessionUI();determineFirst()}
+function dealCards(){state.deck=buildDeck();for(var i=0;i<6;i++){state.playerHand.push(state.deck.pop());state.aiHand.push(state.deck.pop())}}
+function minAttrValue(hand){var min=Infinity,best=null;for(var i=0;i<hand.length;i++){var c=hand[i];for(var j=0;j<ATTRS.length;j++){var a=ATTRS[j];if(c[a.key]<min){min=c[a.key];best={card:c,attr:a.key,value:c[a.key]}}}}return best}
+function determineFirst(){var p=minAttrValue(state.playerHand),ai=minAttrValue(state.aiHand);if(p.value<=ai.value){state.turn='player';state.phase='play';setMessages('🎯 У вас наименьший атрибут ('+attrName(p.attr)+' '+p.value+'). Ваш ход!','🎯 Соперник ходит первым...');startTimerIfNeeded();render()}else{state.turn='ai';state.phase='play';setMessages('🤖 Противник ходит первым...','🎯 Ваш ход!');render();if(mode==='ai')setTimeout(aiAttack,1500)}}
+function setMessages(h,g){if(mode==='guest')state.message=g;else state.message=h;state.remoteMessage=(mode==='host')?g:h}
+function refillHands(){while(state.playerHand.length<6&&state.deck.length>0)state.playerHand.push(state.deck.pop());while(state.aiHand.length<6&&state.deck.length>0)state.aiHand.push(state.deck.pop())}
+function checkEnd(){if(state.playerHand.length===0&&state.aiHand.length===0){endGame('draw');return true}if(state.playerHand.length===0){endGame('player');return true}if(state.aiHand.length===0){endGame('ai');return true}return false}
+function stopTimer(){if(timerInterval){clearInterval(timerInterval);timerInterval=null}document.getElementById('timerBar').classList.remove('on')}
+function startTimerIfNeeded(){stopTimer();if(!getSetting('timerEnabled',false))return;if(state.phase!=='play'||state.turn!=='player')return;var total=getSetting('timerSeconds',30);timerSecondsLeft=total;document.getElementById('timerBar').classList.add('on');var fill=document.getElementById('timerFill');fill.style.width='100%';timerInterval=setInterval(function(){timerSecondsLeft--;fill.style.width=(timerSecondsLeft/total*100)+'%';if(timerSecondsLeft<=0){stopTimer();if(state.phase==='play'&&state.turn==='player'){if(state.pile.length>0)playerTake();else{var bc=null,ba=null,bv=-1;for(var i=0;i<state.playerHand.length;i++)for(var j=0;j<ATTRS.length;j++){var v=state.playerHand[i][ATTRS[j].key];if(v>bv){bv=v;bc=state.playerHand[i];ba=ATTRS[j].key}}if(bc){showToast('⏱️ Время вышло!');playerAttack(bc,ba)}}}else if(state.phase==='awaitingBit')confirmBit()}},1000)}
+function endGame(winner){stopTimer();state.phase='gameover';var overlay=document.getElementById('overlay'),content=document.getElementById('overlayContent');var iWon=(mode==='guest')?(winner==='ai'):(winner==='player');var s=getStats();s.games=(s.games||0)+1;s.heroesPlayed=s.heroesPlayed||{};state.playerHand.forEach(function(c){s.heroesPlayed[c.name]=(s.heroesPlayed[c.name]||0)+1});var target=getSetting('seriesBest',1);var btn='<button class="btn" onclick="rematch()" style="margin-right:8px">🔄 Реванш</button><button class="btn" onclick="backToMenu()">В меню</button>';if(winner==='draw'){saveStats(s);addXP(10);content.innerHTML='<h1>🤝 НИЧЬЯ</h1><p>Оба вышли одновременно.</p>'+btn}else if(iWon){s.wins=(s.wins||0)+1;s.streak=(s.streak||0)+1;if(s.streak>(s.bestStreak||0))s.bestStreak=s.streak;saveStats(s);sessionWins++;addXP(25);play('win');victorySparks();var ex=target>1?'<p style="color:#ffd700;font-size:18px;font-family:Russo One,sans-serif">Серия: <b>'+sessionWins+' / '+target+'</b>'+(sessionWins>=target?' — 🎉 ПОБЕДА!':'')+'</p>':'';content.innerHTML='<h1>🏆 ПОБЕДА!</h1>'+ex+'<p>Вы вышли из игры первым!</p>'+btn}else{s.losses=(s.losses||0)+1;s.streak=0;saveStats(s);sessionLosses++;addXP(10);play('lose');var ex2=target>1?'<p style="color:#ffd700;font-size:18px;font-family:Russo One,sans-serif">Серия: <b>'+sessionWins+' / '+target+'</b></p>':'';content.innerHTML='<h1>😢 ПОРАЖЕНИЕ</h1>'+ex2+'<p>Вы остались «дураком».</p>'+btn}updateSessionUI();updateStatsBar();setTimeout(checkAchievements,500);overlay.classList.remove('hidden');if(mode==='host')syncToGuest()}
+function rematch(){play('click');document.getElementById('overlay').classList.add('hidden');if(mode==='ai'){resetState();dealCards();updateStatsBar();updateSessionUI();determineFirst()}else if(mode==='host'){resetState();dealCards();updateStatsBar();updateSessionUI();determineFirst();syncToGuest()}else if(mode==='guest'){sendToHost({type:'rematch'})}}
+function backToMenu(){stopTimer();document.getElementById('overlay').classList.add('hidden');document.getElementById('menu').classList.remove('hidden');document.getElementById('roomPanel').classList.add('hidden');document.getElementById('chatPanel').classList.remove('visible');document.getElementById('emojiPanel').classList.remove('visible');closeCardModal();resetSession();mode='menu';try{if(conn)conn.close();if(peer)peer.destroy()}catch(e){}conn=null;peer=null;if(window.history&&window.history.replaceState)window.history.replaceState({},'',window.location.pathname);updateStatsBar()}
+function generateCode(){var c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',s='';for(var i=0;i<5;i++)s+=c[Math.floor(Math.random()*c.length)];return s}
+function buildInviteLink(code){return window.location.origin+window.location.pathname+'?room='+code}
+function copyToClipboard(t){if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).then(function(){showToast('📋 Скопировано!')}).catch(function(){fallbackCopy(t)});else fallbackCopy(t)}
+function fallbackCopy(t){var ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');showToast('📋 Скопировано!')}catch(e){showToast('❌ Не удалось')}document.body.removeChild(ta)}
+function showRoomPanel(h){document.getElementById('roomPanelInner').innerHTML=h;document.getElementById('roomPanel').classList.remove('hidden')}
+function updateRoomStatus(t){var e=document.getElementById('roomStatus');if(e)e.textContent=t}
+function createRoom(){mode='host';isHost=true;roomCode=generateCode();resetSession();document.getElementById('menu').classList.add('hidden');document.getElementById('chatBtn').style.display='inline-block';document.getElementById('chatBtn').classList.add('on');document.getElementById('emojiBtn').style.display='inline-block';document.getElementById('enemyName').textContent='СОПЕРНИК';var link=buildInviteLink(roomCode);var real=window.location.protocol==='http:'||window.location.protocol==='https:';var h='<h2>🌐 Комната создана</h2><p style="color:#aaa;font-size:13px">Код:</p><div class="codeBox">'+roomCode+'</div>';if(real)h+='<p style="color:#aaa;font-size:13px;margin-top:10px">Ссылка:</p><div class="linkBox" onclick="copyToClipboard(\''+link+'\')">'+link+'</div><button class="btn small" onclick="copyToClipboard(\''+link+'\')">📋 Скопировать</button>';h+='<div class="status waiting" id="roomStatus" style="margin-top:14px">Ожидание соперника</div><button class="btn" onclick="backToMenu()" style="margin-top:18px;background:linear-gradient(145deg,#7f8c8d,#555);color:#fff">Отмена</button>';showRoomPanel(h);try{if(peer)peer.destroy()}catch(e){}peer=new Peer('marveldurak-'+roomCode,{debug:1});peer.on('open',function(){updateRoomStatus('✅ Комната готова. Ждём...')});peer.on('connection',function(c){conn=c;updateRoomStatus('🔗 Соперник подключается...');setupConnection(true)});peer.on('error',function(err){updateRoomStatus('❌ Ошибка: '+err.type)})}
+function showJoinRoom(pre){mode='guest';isHost=false;document.getElementById('menu').classList.add('hidden');var cv=pre?pre.toUpperCase():'';showRoomPanel('<h2>🔗 Присоединиться</h2><p style="color:#aaa">Введите код:</p><input id="codeInput" maxlength="5" autocomplete="off" placeholder="XXXXX" value="'+cv+'"><div class="status" id="roomStatus">Готов</div><button class="btn" onclick="doJoin()">Подключиться</button><button class="btn" onclick="backToMenu()" style="margin-left:8px;background:linear-gradient(145deg,#7f8c8d,#555);color:#fff">Отмена</button>');setTimeout(function(){var i=document.getElementById('codeInput');if(i){i.focus();i.addEventListener('input',function(){this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')});i.addEventListener('keydown',function(e){if(e.key==='Enter')doJoin()});if(cv&&cv.length===5)setTimeout(doJoin,300)}},50)}
+function doJoin(){var c=(document.getElementById('codeInput').value||'').trim().toUpperCase();if(c.length<5){updateRoomStatus('❌ Введите 5 символов');return}roomCode=c;updateRoomStatus('🔌 Подключение...');try{if(peer)peer.destroy()}catch(e){}peer=new Peer({debug:1});peer.on('open',function(){conn=peer.connect('marveldurak-'+c,{reliable:true});setupConnection(false)});peer.on('error',function(err){updateRoomStatus(err.type==='peer-unavailable'?'❌ Комната не найдена':'❌ Ошибка: '+err.type)})}
+function setupConnection(asHost){conn.on('open',function(){updateRoomStatus('✅ Соединение!');if(asHost){conn.send({type:'welcome'});setTimeout(function(){document.getElementById('roomPanel').classList.add('hidden');document.getElementById('connStatus').style.display='';document.getElementById('connStatus').innerHTML='🌐 <b>Онлайн</b>';document.getElementById('chatBtn').style.display='inline-block';document.getElementById('emojiBtn').style.display='inline-block';resetState();dealCards();updateStatsBar();updateSessionUI();determineFirst()},300)}else{conn.send({type:'ready'});document.getElementById('roomPanel').classList.add('hidden');document.getElementById('connStatus').style.display='';document.getElementById('connStatus').innerHTML='🌐 <b>Подключено</b>';document.getElementById('chatBtn').style.display='inline-block';document.getElementById('emojiBtn').style.display='inline-block';resetState();state.message='⏳ Ожидание первого хода...';render()}});conn.on('data',function(d){if(asHost)handleGuestMessage(d);else handleHostMessage(d)});conn.on('close',function(){alert('🔌 Соединение потеряно');backToMenu()})}
+function syncToGuest(){if(mode!=='host'||!conn||!conn.open)return;try{conn.send({type:'state',yourHand:state.aiHand,oppHandCount:state.playerHand.length,deckCount:state.deck.length,discardCount:state.discard.length,pile:state.pile,yourTurn:state.turn==='ai',phase:state.phase,message:state.remoteMessage,lastPlayedId:state.lastPlayedId,bitWinner:state.bitWinner})}catch(e){}}
+function sendToHost(m){if(mode==='guest'&&conn&&conn.open)try{conn.send(m)}catch(e){}}
+function handleGuestMessage(m){if(!m||!m.type)return;if(m.type==='attack'){if(state.turn!=='ai'||state.pile.length>0)return;var c=null;for(var i=0;i<state.aiHand.length;i++)if(state.aiHand[i].id===m.cardId)c=state.aiHand[i];if(!c)return;state.aiHand.splice(state.aiHand.indexOf(c),1);state.pile=[{card:c,attr:m.attr,value:c[m.attr],coveredBy:null}];state.lastPlayedId=c.id;state.turn='player';setMessages('🤖 Соперник ходит: '+attrName(m.attr)+' '+c[m.attr]+'.','Вы ходите.');play('attack');render()}else if(m.type==='respond'){if(state.turn!=='ai'||state.pile.length===0)return;var c2=null;for(var j=0;j<state.aiHand.length;j++)if(state.aiHand[j].id===m.cardId)c2=state.aiHand[j];if(c2)guestRespondAction(c2)}else if(m.type==='take'){if(state.turn!=='ai'||state.pile.length===0)return;var cs=[];for(var p=0;p<state.pile.length;p++){cs.push(state.pile[p].card);if(state.pile[p].coveredBy)cs.push(state.pile[p].coveredBy)}for(var q=0;q<cs.length;q++)state.aiHand.push(cs[q]);state.pile=[];state.lastPlayedId=null;refillHands();state.turn='player';setMessages('🤖 Соперник взял карты!','📥 Вы взяли.');play('take');render();if(checkEnd())return}else if(m.type==='bit'){if(state.phase==='awaitingBit')confirmBit()}else if(m.type==='chat'){addChatMessage('them',m.text);showEmotePop(m.text.length<=3?m.text:'💬')}else if(m.type==='emote'){showEmotePop(m.emoji);addChatMessage('them',m.emoji)}else if(m.type==='rematch'){rematch()}}
+function handleHostMessage(m){if(!m||!m.type)return;if(m.type==='state'){state.playerHand=m.yourHand;state.aiHand=[];for(var i=0;i<m.oppHandCount;i++)state.aiHand.push({});state.deck=[];for(var j=0;j<m.deckCount;j++)state.deck.push({});state.discard=[];for(var k=0;k<m.discardCount;k++)state.discard.push({});state.pile=m.pile||[];state.turn=m.yourTurn?'player':'ai';state.phase=m.phase;state.message=m.message;state.lastPlayedId=m.lastPlayedId;state.bitWinner=(m.bitWinner==='ai')?'player':(m.bitWinner==='player'?'ai':null);render()}else if(m.type==='chat'){addChatMessage('them',m.text);showEmotePop(m.text.length<=3?m.text:'💬')}else if(m.type==='emote'){showEmotePop(m.emoji);addChatMessage('them',m.emoji)}}
+function guestRespondAction(card){var pile=state.pile,latest=pile[pile.length-1];var cardIdx=state.aiHand.indexOf(card);if(cardIdx<0)return;var anyCovered=false;for(var i=0;i<pile.length;i++)if(pile[i].coveredBy)anyCovered=true;if(!anyCovered&&card[latest.attr]===latest.value){state.aiHand.splice(cardIdx,1);pile.push({card:card,attr:latest.attr,value:latest.value,coveredBy:null});state.lastPlayedId=card.id;state.turn='player';setMessages('🔁 Соперник перевёл!','🔁 Вы перевели!');play('transfer');flashScreen();render();return}var uncovered=[];for(var k=0;k<pile.length;k++)if(!pile[k].coveredBy)uncovered.push(pile[k]);for(var m=0;m<uncovered.length;m++){var entry=uncovered[m];if(card[entry.attr]>entry.value){state.aiHand.splice(cardIdx,1);entry.coveredBy=card;state.lastPlayedId=card.id;play('cover');var so=false;for(var n=0;n<pile.length;n++)if(!pile[n].coveredBy)so=true;if(!so){render();setTimeout(function(){requestBit('ai')},400)}else{var left=0;for(var q=0;q<pile.length;q++)if(!pile[q].coveredBy)left++;setMessages('Соперник отбил одну. Осталось: '+left,'✅ Отбили одну.');render()}return}}}
+function playerAttack(card,attrKey){if(mode==='guest'){if(state.phase!=='play'||state.turn!=='player'||state.pile.length>0)return;play('click');sendToHost({type:'attack',cardId:card.id,attr:attrKey});return}if(state.phase!=='play'||state.turn!=='player'||state.pile.length>0)return;var idx=state.playerHand.indexOf(card);if(idx<0)return;state.playerHand.splice(idx,1);state.pile=[{card:card,attr:attrKey,value:card[attrKey],coveredBy:null}];state.lastPlayedId=card.id;state.turn='ai';setMessages('Вы ходите: '+attrName(attrKey)+' '+card[attrKey]+'.','🤖 Соперник ходит.');play('attack');stopTimer();render();if(mode==='ai')setTimeout(aiRespond,1300)}
+function playerRespondWithCard(card){if(mode==='guest'){if(state.phase!=='play'||state.turn!=='player'||state.pile.length===0)return;play('click');sendToHost({type:'respond',cardId:card.id});return}if(state.phase!=='play'||state.turn!=='player'||state.pile.length===0)return;var pile=state.pile,latest=pile[pile.length-1];var cardIdx=state.playerHand.indexOf(card);if(cardIdx<0)return;var anyCovered=false;for(var i=0;i<pile.length;i++)if(pile[i].coveredBy)anyCovered=true;if(!anyCovered&&card[latest.attr]===latest.value){state.playerHand.splice(cardIdx,1);pile.push({card:card,attr:latest.attr,value:latest.value,coveredBy:null});state.lastPlayedId=card.id;state.turn='ai';setMessages('🔁 Вы перевели!','🔁 Соперник перевёл!');play('transfer');flashScreen();stopTimer();render();if(mode==='ai')setTimeout(aiRespond,1300);return}var uncovered=[];for(var k=0;k<pile.length;k++)if(!pile[k].coveredBy)uncovered.push(pile[k]);for(var m=0;m<uncovered.length;m++){var entry=uncovered[m];if(card[entry.attr]>entry.value){state.playerHand.splice(cardIdx,1);entry.coveredBy=card;state.lastPlayedId=card.id;play('cover');var so=false;for(var n=0;n<pile.length;n++)if(!pile[n].coveredBy)so=true;if(!so){render();setTimeout(function(){requestBit('player')},400)}else{var left=0;for(var q=0;q<pile.length;q++)if(!pile[q].coveredBy)left++;setMessages('✅ Отбили одну. Осталось: '+left,'✅ Соперник отбил одну.');render()}return}}setMessages('❌ Карта не подходит.','❌ Не подходит.');render()}
+function playerTake(){if(mode==='guest'){if(state.phase==='play'&&state.turn==='player'&&state.pile.length>0){play('click');sendToHost({type:'take'})}return}if(state.phase!=='play'||state.turn!=='player'||state.pile.length===0)return;var cards=[];for(var i=0;i<state.pile.length;i++){cards.push(state.pile[i].card);if(state.pile[i].coveredBy)cards.push(state.pile[i].coveredBy)}for(var j=0;j<cards.length;j++)state.playerHand.push(cards[j]);state.pile=[];state.lastPlayedId=null;refillHands();state.turn='ai';setMessages('📥 Вы взяли карты. Ход соперника...','📥 Соперник взял.');play('take');stopTimer();render();if(checkEnd())return;if(mode==='ai')setTimeout(aiAttack,1300)}
+function requestBit(whoCovered){state.phase='awaitingBit';state.bitWinner=whoCovered;if(whoCovered==='player')setMessages('✅ Вы отбились! Нажмите «Бито».','🤖 Соперник отбился.');else setMessages('🤖 Соперник отбился. Нажмите «Бито».','✅ Вы отбились! Нажмите «Бито».');render()}
+function confirmBit(){if(mode==='guest'){if(state.phase==='awaitingBit'){play('click');sendToHost({type:'bit'})}return}if(state.phase!=='awaitingBit')return;var all=[];for(var i=0;i<state.pile.length;i++){all.push(state.pile[i].card);if(state.pile[i].coveredBy)all.push(state.pile[i].coveredBy)}for(var j=0;j<all.length;j++)state.discard.push(all[j]);state.pile=[];state.lastPlayedId=null;refillHands();var defender=state.bitWinner;state.bitWinner=null;state.phase='play';play('bit');flashScreen();render();if(checkEnd())return;if(defender==='player'){state.turn='player';setMessages('✅ Бито! Ваш ход.','✅ Бито! Ход соперника...');startTimerIfNeeded();render()}else{state.turn='ai';setMessages('✅ Бито! Ход соперника...','✅ Бито! Ваш ход.');render();if(mode==='ai')setTimeout(aiAttack,1300)}}
+function aiAttack(){if(mode!=='ai')return;if(state.phase!=='play'||state.turn!=='ai'||state.pile.length>0)return;if(state.aiHand.length===0){endGame('player');return}var choice;if(Math.random()<0.7){var best=null;for(var i=0;i<state.aiHand.length;i++){var c=state.aiHand[i];for(var j=0;j<ATTRS.length;j++){var a=ATTRS[j];if(!best||c[a.key]>best.value)best={card:c,attr:a.key,value:c[a.key]}}}choice=best}else{var rc=state.aiHand[Math.floor(Math.random()*state.aiHand.length)];var ba=ATTRS[0].key,bv=rc[ATTRS[0].key];for(var k=1;k<ATTRS.length;k++)if(rc[ATTRS[k].key]>bv){bv=rc[ATTRS[k].key];ba=ATTRS[k].key}choice={card:rc,attr:ba,value:bv}}state.aiHand.splice(state.aiHand.indexOf(choice.card),1);state.pile=[{card:choice.card,attr:choice.attr,value:choice.value,coveredBy:null}];state.lastPlayedId=choice.card.id;state.turn='player';setMessages('🤖 Противник ходит: '+attrName(choice.attr)+' '+choice.value+'.','🤖 Соперник ходит.');play('attack');render()}
+function aiRespond(){if(mode!=='ai')return;if(state.phase!=='play'||state.turn!=='ai'||state.pile.length===0)return;var pile=state.pile,latest=pile[pile.length-1];var anyCovered=false;for(var i=0;i<pile.length;i++)if(pile[i].coveredBy)anyCovered=true;if(!anyCovered&&Math.random()<0.35){for(var t=0;t<state.aiHand.length;t++){if(state.aiHand[t][latest.attr]===latest.value){var tc=state.aiHand.splice(t,1)[0];pile.push({card:tc,attr:latest.attr,value:latest.value,coveredBy:null});state.lastPlayedId=tc.id;state.turn='player';setMessages('🔁 Противник перевёл!','🔁 Противник перевёл!');play('transfer');flashScreen();render();return}}}var uncovered=[];for(var u=0;u<pile.length;u++)if(!pile[u].coveredBy)uncovered.push(pile[u]);var tmp=state.aiHand.slice(),covers=[],ok=true;for(var e=0;e<uncovered.length;e++){var entry=uncovered[e],bi=-1,bv=Infinity;for(var h=0;h<tmp.length;h++){var v=tmp[h][entry.attr];if(v>entry.value&&v<bv){bv=v;bi=h}}if(bi===-1){ok=false;break}covers.push({entry:entry,card:tmp[bi]});tmp.splice(bi,1)}if(ok&&covers.length>0){for(var c=0;c<covers.length;c++){var idx=state.aiHand.indexOf(covers[c].card);if(idx>=0)state.aiHand.splice(idx,1);covers[c].entry.coveredBy=covers[c].card}state.lastPlayedId=covers[covers.length-1].card.id;setMessages('🤖 Противник отбился.','🤖 Противник отбился.');play('cover');render();setTimeout(function(){requestBit('ai')},500);return}var cards=[];for(var p=0;p<pile.length;p++){cards.push(pile[p].card);if(pile[p].coveredBy)cards.push(pile[p].coveredBy)}for(var q=0;q<cards.length;q++)state.aiHand.push(cards[q]);state.pile=[];state.lastPlayedId=null;refillHands();state.turn='player';setMessages('🤖 Противник взял карты! Ваш ход.','🤖 Противник взял карты!');play('take');render();if(checkEnd())return}
+function renderCard(card,opts){opts=opts||{};var theme=HERO_THEMES[card.name]||{c1:'#444',c2:'#888',icon:'❔',fx:'float'};var el=document.createElement('div');el.className='card fx-'+theme.fx;if(opts.mini)el.classList.add('mini');if(opts.extraClass)el.classList.add(opts.extraClass);if(opts.justPlayed)el.classList.add('just-played');if(card.img)el.classList.add('has-img');if(opts.noTilt)el.classList.add('no-tilt');el.style.setProperty('--c1',theme.c1);el.style.setProperty('--c2',theme.c2);el.style.setProperty('--glow',hexToRgba(theme.c2,0.55));var aura=document.createElement('div');aura.className='aura';el.appendChild(aura);var em=document.createElement('div');em.className='emblem';em.textContent=theme.icon;el.appendChild(em);if(!opts.noZoom){var zoom=document.createElement('div');zoom.className='card-zoom';zoom.textContent='🔍';zoom.onclick=function(ev){ev.stopPropagation();openCardModal(card)};el.appendChild(zoom)}if(card.img){var img=document.createElement('div');img.className='card-img';img.style.backgroundImage='url("'+card.img+'")';el.appendChild(img)}var nm=document.createElement('div');nm.className='card-name';nm.textContent=card.name;el.appendChild(nm);for(var i=0;i<ATTRS.length;i++)(function(a){var row=document.createElement('div');row.className='attr-row';row.style.background=a.color+'40';var n=document.createElement('span');n.textContent=a.icon+' '+a.short;row.appendChild(n);var v=document.createElement('span');v.className='attr-val';v.textContent=card[a.key];row.appendChild(v);if(opts.highlightAttr===a.key)row.classList.add('highlight');if(opts.pickableAttr){row.classList.add('pickable');row.onclick=function(ev){ev.stopPropagation();opts.pickableAttr(a.key)}}el.appendChild(row)})(ATTRS[i]);el.onclick=function(ev){if(ev.target.closest&&(ev.target.closest('.attr-row.pickable')||ev.target.closest('.card-zoom')))return;if(opts.onClick)opts.onClick(card);else openCardModal(card)};return el}
+function applyFan(container,cards){var count=cards.length;var els=container.querySelectorAll('.card');for(var i=0;i<els.length;i++){var mid=(count-1)/2,offset=i-mid;els[i].style.transform='rotate('+(offset*2.2)+'deg) translateY('+(Math.abs(offset)*3)+'px)';els[i].style.zIndex=10+i}}
+function render(){document.getElementById('aiCount').textContent=state.aiHand.length;document.getElementById('deckCount').textContent=state.deck.length;document.getElementById('discardCount').textContent=state.discard.length;document.getElementById('myCount').textContent=state.playerHand.length;var db=document.getElementById('deckBig');if(db)db.textContent=state.deck.length;var dg=document.getElementById('discardBig');if(dg)dg.textContent=state.discard.length;var dv=document.getElementById('deckVisual');if(dv){if(state.deck.length===0)dv.classList.add('empty');else dv.classList.remove('empty');var d1=dv.querySelector('.d1'),d2=dv.querySelector('.d2'),d3=dv.querySelector('.d3'),d4=dv.querySelector('.d4');if(d1)d1.style.display=state.deck.length>1?'':'none';if(d2)d2.style.display=state.deck.length>3?'':'none';if(d3)d3.style.display=state.deck.length>6?'':'none';if(d4)d4.style.display=state.deck.length>10?'':'none'}var ti=document.getElementById('turnIndicator');if(ti&&state.phase==='play'){ti.classList.remove('hidden');if(state.turn==='player'){ti.className='my';ti.textContent='ТВОЙ ХОД'}else{ti.className='enemy';ti.textContent='ХОД СОПЕРНИКА'}}else if(ti)ti.classList.add('hidden');var eInf=document.getElementById('enemyInfo'),mInf=document.getElementById('myInfo');if(eInf&&mInf&&state.phase==='play'){if(state.turn==='ai'){eInf.classList.add('active');mInf.classList.remove('active')}else{mInf.classList.add('active');eInf.classList.remove('active')}}var aiH=document.getElementById('aiHand');aiH.innerHTML='';for(var i=0;i<state.aiHand.length;i++){var b=document.createElement('div');b.className='card back mini no-tilt';b.textContent='★';var mid=(state.aiHand.length-1)/2,off=i-mid;b.style.transform='rotate('+(off*2)+'deg) translateY('+(Math.abs(off)*2)+'px)';b.style.zIndex=10+i;aiH.appendChild(b)}var tE=document.getElementById('pileCards');tE.innerHTML='';if(state.pile.length===0){var ph=document.createElement('div');ph.className='pile-placeholder';ph.textContent='СТОЛ ПУСТ';tE.appendChild(ph)}else{for(var j=0;j<state.pile.length;j++)(function(entry){var stack=document.createElement('div');stack.className='pile-stack';if(entry.coveredBy){var cov=renderCard(entry.coveredBy,{extraClass:'cover-card',justPlayed:entry.coveredBy.id===state.lastPlayedId,noTilt:true});stack.appendChild(cov)}var base=renderCard(entry.card,{highlightAttr:entry.attr,justPlayed:entry.card.id===state.lastPlayedId,noTilt:true});if(entry.coveredBy)base.classList.add('covered');stack.appendChild(base);tE.appendChild(stack)})(state.pile[j])}document.getElementById('message').textContent=state.message;var aE=document.getElementById('actions');aE.innerHTML='';if(state.phase==='play'&&state.turn==='player'&&state.pile.length>0){var tb=document.createElement('button');tb.className='btn take';tb.textContent='📥 Взять карты';tb.onclick=function(){play('click');playerTake()};aE.appendChild(tb)}if(state.phase==='awaitingBit'&&(mode!=='guest'||state.bitWinner==='player')){var bb=document.createElement('button');bb.className='btn bit';bb.textContent='✋ Бито!';bb.onclick=function(){play('click');confirmBit()};aE.appendChild(bb)}var pH=document.getElementById('playerHand');pH.innerHTML='';for(var k=0;k<state.playerHand.length;k++)(function(card){var ec='',oc=null,pa=null;if(state.phase==='play'&&state.turn==='player'){if(state.pile.length===0){ec='ready-attack';pa=function(a){play('click');playerAttack(card,a)}}else{var latest=state.pile[state.pile.length-1];var anyC=false;for(var z=0;z<state.pile.length;z++)if(state.pile[z].coveredBy)anyC=true;if(!anyC&&card[latest.attr]===latest.value){ec='transferable';oc=function(c){play('click');playerRespondWithCard(c)}}else{var canCover=false;for(var y=0;y<state.pile.length;y++){var entry=state.pile[y];if(!entry.coveredBy&&card[entry.attr]>entry.value){canCover=true;break}}if(canCover){ec='defendable';oc=function(c){play('click');playerRespondWithCard(c)}}}}}var el=renderCard(card,{extraClass:ec,onClick:oc,pickableAttr:pa,noTilt:true});pH.appendChild(el)})(state.playerHand[k]);applyFan(pH,state.playerHand);if(mode==='host')syncToGuest()}
+function toggleChat(){var p=document.getElementById('chatPanel');p.classList.toggle('visible');if(p.classList.contains('visible'))document.getElementById('chatInput').focus();if(!p.dataset.init){initQuickBar();p.dataset.init='1'}}
+function initQuickBar(){var phrases=['Хороший ход!','Сдавайся!','Удачи!','Красава!','Ого!','Реванш?'];var qb=document.getElementById('quickBar');qb.innerHTML='';phrases.forEach(function(p){var b=document.createElement('button');b.textContent=p;b.onclick=function(){sendChat(p)};qb.appendChild(b)})}
+function sendChat(text){var t=text||(document.getElementById('chatInput').value||'').trim();if(!t)return;document.getElementById('chatInput').value='';addChatMessage('me',t);if(mode==='host'&&conn&&conn.open)conn.send({type:'chat',text:t});else if(mode==='guest')sendToHost({type:'chat',text:t});showEmotePop(t.length<=3?t:'💬')}
+function addChatMessage(who,text){var b=document.getElementById('chatBody');var m=document.createElement('div');m.className='chat-msg '+who;var w=document.createElement('span');w.className='who';w.textContent=who==='me'?'Вы:':'Соперник:';m.appendChild(w);m.appendChild(document.createTextNode(text));b.appendChild(m);b.scrollTop=b.scrollHeight}
+function toggleEmoji(){var p=document.getElementById('emojiPanel');p.classList.toggle('visible');if(!p.dataset.init){var emojis=['😂','😎','🔥','💪','🤣','😱','👍','👎','🎉','🤔','😡','🥶','💀','👑','⚡','🎯','❤️','🙈'];emojis.forEach(function(e){var b=document.createElement('button');b.textContent=e;b.onclick=function(){showEmotePop(e);addChatMessage('me',e);if(mode==='host'&&conn&&conn.open)conn.send({type:'emote',emoji:e});else if(mode==='guest')sendToHost({type:'emote',emoji:e})};p.appendChild(b)});p.dataset.init='1'}}
+document.addEventListener('click',initAudio,{once:true});
+applySettingsToUI();
+resetState();
+updateStatsBar();
+render();
+(function(){try{var params=new URLSearchParams(window.location.search);var code=params.get('room');if(code&&code.length===5)setTimeout(function(){showJoinRoom(code.toUpperCase())},200)}catch(e){}})();
+</script>
+</body>
+</html>
